@@ -29,8 +29,6 @@ export function NavUser({ user }: { user: UserDTO }) {
   const { isMobile } = useSidebar();
   const { logout } = useLogout();
 
-  console.log(user);
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -74,24 +72,9 @@ export function NavUser({ user }: { user: UserDTO }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => logout()}>
               <IconLogout />
-              Log out
+              Desconectar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

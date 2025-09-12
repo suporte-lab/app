@@ -35,6 +35,55 @@ export interface Databasechangeloglock {
   lockgranted: Timestamp | null;
 }
 
+export interface Municipality {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  isDeleted: Generated<boolean>;
+  latitude: number;
+  longitude: number;
+  name: string;
+  state: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Project {
+  addressNumber: string | null;
+  addressStreet: string;
+  addressZipCode: string | null;
+  categoryId: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  isDeleted: Generated<boolean>;
+  latitude: number;
+  longitude: number;
+  municipalityId: string;
+  name: string;
+  responsibleEmail: string;
+  responsibleName: string | null;
+  responsiblePhone: string | null;
+  responsibleRole: string | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface ProjectCategory {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  isDeleted: Generated<boolean>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Research {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  isDeleted: Generated<boolean>;
+  municipalityId: string;
+  name: string;
+  slug: string;
+  surveyId: string;
+  updatedAt: Generated<Timestamp>;
+}
+
 export interface Session {
   createdAt: Generated<Timestamp>;
   id: string;
@@ -42,20 +91,72 @@ export interface Session {
   userId: string;
 }
 
+export interface Survey {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  isDeleted: Generated<boolean>;
+  name: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface SurveyAnswer {
+  answer: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  projectId: string;
+  questionId: string;
+  researchId: string;
+  surveyId: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface SurveyQuestion {
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  id: string;
+  isDeleted: Generated<boolean>;
+  isPublic: Generated<boolean>;
+  position: number;
+  question: string;
+  surveyId: string;
+  type: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface SurveyQuestionMetadata {
+  createdAt: Generated<Timestamp>;
+  id: string;
+  isDeleted: Generated<boolean>;
+  position: number;
+  surveyQuestionId: string;
+  type: string;
+  updatedAt: Generated<Timestamp>;
+  value: string | null;
+}
+
 export interface User {
   createdAt: Generated<Timestamp>;
-  email: string;
+  email: string | null;
   emailVerified: Generated<boolean>;
   id: string;
   nickname: string;
   password: string;
   role: Generated<string>;
+  status: Generated<string>;
   updatedAt: Generated<Timestamp>;
 }
 
 export interface DB {
   databasechangelog: Databasechangelog;
   databasechangeloglock: Databasechangeloglock;
+  municipality: Municipality;
+  project: Project;
+  projectCategory: ProjectCategory;
+  research: Research;
   session: Session;
+  survey: Survey;
+  surveyAnswer: SurveyAnswer;
+  surveyQuestion: SurveyQuestion;
+  surveyQuestionMetadata: SurveyQuestionMetadata;
   user: User;
 }

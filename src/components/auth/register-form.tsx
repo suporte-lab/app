@@ -51,59 +51,6 @@ export function RegisterForm({
                     </div>
                   )}
                 />
-                <form.Field
-                  name="email"
-                  children={(field) => (
-                    <div className="grid gap-3">
-                      <Label htmlFor={field.name}>Email</Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                      <FieldError error={field.state.meta.errors?.join(", ")} />
-                    </div>
-                  )}
-                />
-
-                <form.Field
-                  name="password"
-                  children={(field) => (
-                    <div className="grid gap-3">
-                      <Label htmlFor={field.name}>Password</Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                      <FieldError error={field.state.meta.errors?.join(", ")} />
-                    </div>
-                  )}
-                />
-
-                <form.Field
-                  name="confirmPassword"
-                  children={(field) => (
-                    <div className="grid gap-3">
-                      <Label htmlFor={field.name}>Confirm Password</Label>
-
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                      <FieldError error={field.state.meta.errors?.join(", ")} />
-                    </div>
-                  )}
-                />
 
                 <Button type="submit" className="w-full">
                   Register

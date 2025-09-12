@@ -20,9 +20,6 @@ export function useRegister() {
 
   const defaultValues: RegisterFormParams = {
     nickname: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
   };
 
   const form = useForm({

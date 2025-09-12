@@ -1,3 +1,6 @@
+import { Selectable } from "kysely";
+import { DB } from "@/server/db/types";
+
 export type SessionDTO = {
   id: string;
   userId: string;
@@ -5,10 +8,4 @@ export type SessionDTO = {
   createdAt: Date;
 };
 
-export type UserDTO = {
-  id: string;
-  email: string;
-  nickname: string;
-  role: string;
-  createdAt: Date;
-};
+export type UserDTO = Selectable<DB["user"]>;

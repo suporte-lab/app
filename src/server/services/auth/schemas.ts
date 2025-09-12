@@ -3,22 +3,13 @@ import { z } from "zod";
 // ## Auth ##
 export const loginSchema = () =>
   z.object({
-    email: z.email(),
-    password: z.string().min(1, "Missing password"),
+    nickname: z.string().min(1, "Missing nickname"),
   });
 
 export const registerSchema = () =>
-  z
-    .object({
-      nickname: z.string().min(1, "Missing nickname"),
-      email: z.email(),
-      password: z.string().min(1, "Missing password"),
-      confirmPassword: z.string().min(1, "Missing confirm password"),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords don't match",
-      path: ["confirmPassword"],
-    });
+  z.object({
+    nickname: z.string().min(1, "Missing nickname"),
+  });
 
 // ## User ##
 export const getUserSchema = () =>

@@ -10,14 +10,37 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as MonitoringRouteImport } from './routes/monitoring'
+import { Route as MapRouteImport } from './routes/map'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as _authedRouteImport } from './routes/__authed'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as _authedDashboardRouteImport } from './routes/__authed.dashboard'
+import { Route as ProjectIdIndexRouteImport } from './routes/project.$id.index'
+import { Route as _authedDashboardIndexRouteImport } from './routes/__authed.dashboard.index'
+import { Route as ProjectIdSurveyRouteImport } from './routes/project.$id.survey'
+import { Route as _authedDashboardSurveyIndexRouteImport } from './routes/__authed.dashboard.survey.index'
+import { Route as _authedDashboardResearchIndexRouteImport } from './routes/__authed.dashboard.research.index'
+import { Route as _authedDashboardProjectIndexRouteImport } from './routes/__authed.dashboard.project.index'
+import { Route as _authedDashboardMunicipalityIndexRouteImport } from './routes/__authed.dashboard.municipality.index'
+import { Route as _authedDashboardSurveyIdRouteImport } from './routes/__authed.dashboard.survey.$id'
+import { Route as _authedDashboardProjectIdRouteImport } from './routes/__authed.dashboard.project.$id'
+import { Route as _authedDashboardMunicipalityIdRouteImport } from './routes/__authed.dashboard.municipality.$id'
+import { Route as _authedDashboardCategoryIdRouteImport } from './routes/__authed.dashboard.category.$id'
+import { Route as _authedDashboardResearchIdIndexRouteImport } from './routes/__authed.dashboard.research.$id.index'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MonitoringRoute = MonitoringRouteImport.update({
+  id: '/monitoring',
+  path: '/monitoring',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -34,51 +57,205 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const _authedDashboardRoute = _authedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const ProjectIdIndexRoute = ProjectIdIndexRouteImport.update({
+  id: '/project/$id/',
+  path: '/project/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const _authedDashboardIndexRoute = _authedDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
   getParentRoute: () => _authedRoute,
 } as any)
+const ProjectIdSurveyRoute = ProjectIdSurveyRouteImport.update({
+  id: '/project/$id/survey',
+  path: '/project/$id/survey',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const _authedDashboardSurveyIndexRoute =
+  _authedDashboardSurveyIndexRouteImport.update({
+    id: '/dashboard/survey/',
+    path: '/dashboard/survey/',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardResearchIndexRoute =
+  _authedDashboardResearchIndexRouteImport.update({
+    id: '/dashboard/research/',
+    path: '/dashboard/research/',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardProjectIndexRoute =
+  _authedDashboardProjectIndexRouteImport.update({
+    id: '/dashboard/project/',
+    path: '/dashboard/project/',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardMunicipalityIndexRoute =
+  _authedDashboardMunicipalityIndexRouteImport.update({
+    id: '/dashboard/municipality/',
+    path: '/dashboard/municipality/',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardSurveyIdRoute =
+  _authedDashboardSurveyIdRouteImport.update({
+    id: '/dashboard/survey/$id',
+    path: '/dashboard/survey/$id',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardProjectIdRoute =
+  _authedDashboardProjectIdRouteImport.update({
+    id: '/dashboard/project/$id',
+    path: '/dashboard/project/$id',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardMunicipalityIdRoute =
+  _authedDashboardMunicipalityIdRouteImport.update({
+    id: '/dashboard/municipality/$id',
+    path: '/dashboard/municipality/$id',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardCategoryIdRoute =
+  _authedDashboardCategoryIdRouteImport.update({
+    id: '/dashboard/category/$id',
+    path: '/dashboard/category/$id',
+    getParentRoute: () => _authedRoute,
+  } as any)
+const _authedDashboardResearchIdIndexRoute =
+  _authedDashboardResearchIdIndexRouteImport.update({
+    id: '/dashboard/research/$id/',
+    path: '/dashboard/research/$id/',
+    getParentRoute: () => _authedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
+  '/monitoring': typeof MonitoringRoute
   '/register': typeof RegisterRoute
-  '/dashboard': typeof _authedDashboardRoute
+  '/project/$id/survey': typeof ProjectIdSurveyRoute
+  '/dashboard': typeof _authedDashboardIndexRoute
+  '/project/$id': typeof ProjectIdIndexRoute
+  '/dashboard/category/$id': typeof _authedDashboardCategoryIdRoute
+  '/dashboard/municipality/$id': typeof _authedDashboardMunicipalityIdRoute
+  '/dashboard/project/$id': typeof _authedDashboardProjectIdRoute
+  '/dashboard/survey/$id': typeof _authedDashboardSurveyIdRoute
+  '/dashboard/municipality': typeof _authedDashboardMunicipalityIndexRoute
+  '/dashboard/project': typeof _authedDashboardProjectIndexRoute
+  '/dashboard/research': typeof _authedDashboardResearchIndexRoute
+  '/dashboard/survey': typeof _authedDashboardSurveyIndexRoute
+  '/dashboard/research/$id': typeof _authedDashboardResearchIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
+  '/monitoring': typeof MonitoringRoute
   '/register': typeof RegisterRoute
-  '/dashboard': typeof _authedDashboardRoute
+  '/project/$id/survey': typeof ProjectIdSurveyRoute
+  '/dashboard': typeof _authedDashboardIndexRoute
+  '/project/$id': typeof ProjectIdIndexRoute
+  '/dashboard/category/$id': typeof _authedDashboardCategoryIdRoute
+  '/dashboard/municipality/$id': typeof _authedDashboardMunicipalityIdRoute
+  '/dashboard/project/$id': typeof _authedDashboardProjectIdRoute
+  '/dashboard/survey/$id': typeof _authedDashboardSurveyIdRoute
+  '/dashboard/municipality': typeof _authedDashboardMunicipalityIndexRoute
+  '/dashboard/project': typeof _authedDashboardProjectIndexRoute
+  '/dashboard/research': typeof _authedDashboardResearchIndexRoute
+  '/dashboard/survey': typeof _authedDashboardSurveyIndexRoute
+  '/dashboard/research/$id': typeof _authedDashboardResearchIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/__authed': typeof _authedRouteWithChildren
   '/login': typeof LoginRoute
+  '/map': typeof MapRoute
+  '/monitoring': typeof MonitoringRoute
   '/register': typeof RegisterRoute
-  '/__authed/dashboard': typeof _authedDashboardRoute
+  '/project/$id/survey': typeof ProjectIdSurveyRoute
+  '/__authed/dashboard/': typeof _authedDashboardIndexRoute
+  '/project/$id/': typeof ProjectIdIndexRoute
+  '/__authed/dashboard/category/$id': typeof _authedDashboardCategoryIdRoute
+  '/__authed/dashboard/municipality/$id': typeof _authedDashboardMunicipalityIdRoute
+  '/__authed/dashboard/project/$id': typeof _authedDashboardProjectIdRoute
+  '/__authed/dashboard/survey/$id': typeof _authedDashboardSurveyIdRoute
+  '/__authed/dashboard/municipality/': typeof _authedDashboardMunicipalityIndexRoute
+  '/__authed/dashboard/project/': typeof _authedDashboardProjectIndexRoute
+  '/__authed/dashboard/research/': typeof _authedDashboardResearchIndexRoute
+  '/__authed/dashboard/survey/': typeof _authedDashboardSurveyIndexRoute
+  '/__authed/dashboard/research/$id/': typeof _authedDashboardResearchIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/map'
+    | '/monitoring'
+    | '/register'
+    | '/project/$id/survey'
+    | '/dashboard'
+    | '/project/$id'
+    | '/dashboard/category/$id'
+    | '/dashboard/municipality/$id'
+    | '/dashboard/project/$id'
+    | '/dashboard/survey/$id'
+    | '/dashboard/municipality'
+    | '/dashboard/project'
+    | '/dashboard/research'
+    | '/dashboard/survey'
+    | '/dashboard/research/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/map'
+    | '/monitoring'
+    | '/register'
+    | '/project/$id/survey'
+    | '/dashboard'
+    | '/project/$id'
+    | '/dashboard/category/$id'
+    | '/dashboard/municipality/$id'
+    | '/dashboard/project/$id'
+    | '/dashboard/survey/$id'
+    | '/dashboard/municipality'
+    | '/dashboard/project'
+    | '/dashboard/research'
+    | '/dashboard/survey'
+    | '/dashboard/research/$id'
   id:
     | '__root__'
     | '/'
     | '/__authed'
     | '/login'
+    | '/map'
+    | '/monitoring'
     | '/register'
-    | '/__authed/dashboard'
+    | '/project/$id/survey'
+    | '/__authed/dashboard/'
+    | '/project/$id/'
+    | '/__authed/dashboard/category/$id'
+    | '/__authed/dashboard/municipality/$id'
+    | '/__authed/dashboard/project/$id'
+    | '/__authed/dashboard/survey/$id'
+    | '/__authed/dashboard/municipality/'
+    | '/__authed/dashboard/project/'
+    | '/__authed/dashboard/research/'
+    | '/__authed/dashboard/survey/'
+    | '/__authed/dashboard/research/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   _authedRoute: typeof _authedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  MapRoute: typeof MapRoute
+  MonitoringRoute: typeof MonitoringRoute
   RegisterRoute: typeof RegisterRoute
+  ProjectIdSurveyRoute: typeof ProjectIdSurveyRoute
+  ProjectIdIndexRoute: typeof ProjectIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -88,6 +265,20 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/monitoring': {
+      id: '/monitoring'
+      path: '/monitoring'
+      fullPath: '/monitoring'
+      preLoaderRoute: typeof MonitoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -111,22 +302,118 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/__authed/dashboard': {
-      id: '/__authed/dashboard'
+    '/project/$id/': {
+      id: '/project/$id/'
+      path: '/project/$id'
+      fullPath: '/project/$id'
+      preLoaderRoute: typeof ProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/__authed/dashboard/': {
+      id: '/__authed/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof _authedDashboardRouteImport
+      preLoaderRoute: typeof _authedDashboardIndexRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/project/$id/survey': {
+      id: '/project/$id/survey'
+      path: '/project/$id/survey'
+      fullPath: '/project/$id/survey'
+      preLoaderRoute: typeof ProjectIdSurveyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/__authed/dashboard/survey/': {
+      id: '/__authed/dashboard/survey/'
+      path: '/dashboard/survey'
+      fullPath: '/dashboard/survey'
+      preLoaderRoute: typeof _authedDashboardSurveyIndexRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/research/': {
+      id: '/__authed/dashboard/research/'
+      path: '/dashboard/research'
+      fullPath: '/dashboard/research'
+      preLoaderRoute: typeof _authedDashboardResearchIndexRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/project/': {
+      id: '/__authed/dashboard/project/'
+      path: '/dashboard/project'
+      fullPath: '/dashboard/project'
+      preLoaderRoute: typeof _authedDashboardProjectIndexRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/municipality/': {
+      id: '/__authed/dashboard/municipality/'
+      path: '/dashboard/municipality'
+      fullPath: '/dashboard/municipality'
+      preLoaderRoute: typeof _authedDashboardMunicipalityIndexRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/survey/$id': {
+      id: '/__authed/dashboard/survey/$id'
+      path: '/dashboard/survey/$id'
+      fullPath: '/dashboard/survey/$id'
+      preLoaderRoute: typeof _authedDashboardSurveyIdRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/project/$id': {
+      id: '/__authed/dashboard/project/$id'
+      path: '/dashboard/project/$id'
+      fullPath: '/dashboard/project/$id'
+      preLoaderRoute: typeof _authedDashboardProjectIdRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/municipality/$id': {
+      id: '/__authed/dashboard/municipality/$id'
+      path: '/dashboard/municipality/$id'
+      fullPath: '/dashboard/municipality/$id'
+      preLoaderRoute: typeof _authedDashboardMunicipalityIdRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/category/$id': {
+      id: '/__authed/dashboard/category/$id'
+      path: '/dashboard/category/$id'
+      fullPath: '/dashboard/category/$id'
+      preLoaderRoute: typeof _authedDashboardCategoryIdRouteImport
+      parentRoute: typeof _authedRoute
+    }
+    '/__authed/dashboard/research/$id/': {
+      id: '/__authed/dashboard/research/$id/'
+      path: '/dashboard/research/$id'
+      fullPath: '/dashboard/research/$id'
+      preLoaderRoute: typeof _authedDashboardResearchIdIndexRouteImport
       parentRoute: typeof _authedRoute
     }
   }
 }
 
 interface _authedRouteChildren {
-  _authedDashboardRoute: typeof _authedDashboardRoute
+  _authedDashboardIndexRoute: typeof _authedDashboardIndexRoute
+  _authedDashboardCategoryIdRoute: typeof _authedDashboardCategoryIdRoute
+  _authedDashboardMunicipalityIdRoute: typeof _authedDashboardMunicipalityIdRoute
+  _authedDashboardProjectIdRoute: typeof _authedDashboardProjectIdRoute
+  _authedDashboardSurveyIdRoute: typeof _authedDashboardSurveyIdRoute
+  _authedDashboardMunicipalityIndexRoute: typeof _authedDashboardMunicipalityIndexRoute
+  _authedDashboardProjectIndexRoute: typeof _authedDashboardProjectIndexRoute
+  _authedDashboardResearchIndexRoute: typeof _authedDashboardResearchIndexRoute
+  _authedDashboardSurveyIndexRoute: typeof _authedDashboardSurveyIndexRoute
+  _authedDashboardResearchIdIndexRoute: typeof _authedDashboardResearchIdIndexRoute
 }
 
 const _authedRouteChildren: _authedRouteChildren = {
-  _authedDashboardRoute: _authedDashboardRoute,
+  _authedDashboardIndexRoute: _authedDashboardIndexRoute,
+  _authedDashboardCategoryIdRoute: _authedDashboardCategoryIdRoute,
+  _authedDashboardMunicipalityIdRoute: _authedDashboardMunicipalityIdRoute,
+  _authedDashboardProjectIdRoute: _authedDashboardProjectIdRoute,
+  _authedDashboardSurveyIdRoute: _authedDashboardSurveyIdRoute,
+  _authedDashboardMunicipalityIndexRoute:
+    _authedDashboardMunicipalityIndexRoute,
+  _authedDashboardProjectIndexRoute: _authedDashboardProjectIndexRoute,
+  _authedDashboardResearchIndexRoute: _authedDashboardResearchIndexRoute,
+  _authedDashboardSurveyIndexRoute: _authedDashboardSurveyIndexRoute,
+  _authedDashboardResearchIdIndexRoute: _authedDashboardResearchIdIndexRoute,
 }
 
 const _authedRouteWithChildren =
@@ -136,7 +423,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   _authedRoute: _authedRouteWithChildren,
   LoginRoute: LoginRoute,
+  MapRoute: MapRoute,
+  MonitoringRoute: MonitoringRoute,
   RegisterRoute: RegisterRoute,
+  ProjectIdSurveyRoute: ProjectIdSurveyRoute,
+  ProjectIdIndexRoute: ProjectIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

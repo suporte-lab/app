@@ -19,8 +19,7 @@ export function useLogin() {
   });
 
   const defaultValues: LoginFormParams = {
-    email: "",
-    password: "",
+    nickname: "",
   };
 
   const form = useForm({

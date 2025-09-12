@@ -23,8 +23,10 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Cincobasico" },
     ],
-
-    links: [{ rel: "stylesheet", href: styles }],
+    links: [
+      { rel: "stylesheet", href: styles },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+    ],
   }),
   component: RootComponent,
 });

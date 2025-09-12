@@ -1,9 +1,15 @@
 import { LoginForm } from "@/components/auth/login-form";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { GalleryVerticalEnd } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    if (context.session) {
+      console.log("session", context.session);
+      // throw redirect({ to: "/dashboard" });
+    }
+  },
 });
 
 function RouteComponent() {

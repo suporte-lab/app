@@ -14,7 +14,7 @@ export function useLogout() {
       queryClient.invalidateQueries({ queryKey: ["session"] });
 
       navigate({ to: "/login" });
-      toast.success("Logged out successfully");
+      toast.success("Desconectado com sucesso");
     },
     onError: (error) => toast.error(error.message),
   });

@@ -4,17 +4,13 @@ import {
   deleteSessionsByUserIdSchema,
   deleteSessionSchema,
   getSessionSchema,
-  getUserByEmailSchema,
-  getUserSchema,
   loginSchema,
   refreshSessionSchema,
   registerSchema,
   setSessionSchema,
-  setUserSchema,
-  updateUserSchema,
   validateSessionSchema,
 } from "./schemas";
-import { SessionDTO, UserDTO } from "./types";
+import { SessionDTO } from "./types";
 import z from "zod";
 import { ulid } from "ulid";
 import { useAppSession } from "@/lib/auth";
@@ -26,7 +22,11 @@ export async function login(
   params: z.infer<ReturnType<typeof loginSchema>>,
   db: Kysely<DB>
 ): Promise<string> {
-  const user = await getUserByEmail(params, db);
+  const user = await db
+    .selectFrom("user")
+    .where("nickname", "=", params.nickname)
+    .selectAll()
+    .executeTakeFirst();
 
   if (!user) {
     throw new Error("Invalid credentials");
@@ -43,20 +43,28 @@ export async function login(
 export async function register(
   params: z.infer<ReturnType<typeof registerSchema>>,
   db: Kysely<DB>
-): Promise<UserDTO> {
-  const existingUser = await getUserByEmail(params, db);
+) {
+  const existingUser = await db
+    .selectFrom("user")
+    .where("nickname", "=", params.nickname)
+    .selectAll()
+    .executeTakeFirst();
 
   if (existingUser) {
-    throw new Error("Email already in use.");
+    throw new Error("User already exists.");
   }
 
-  if (params.password !== params.confirmPassword) {
-    throw new Error("Passwords do not match.");
-  }
+  const user = await db
+    .insertInto("user")
+    .values({
+      id: ulid(),
+      password: "",
+      nickname: params.nickname,
+      createdAt: new Date(),
+    })
+    .returningAll()
+    .executeTakeFirstOrThrow();
 
-  const password = (await hashSecret(params.password)).toString();
-
-  const user = await setUser({ ...params, password }, db);
   const { token } = await setSession({ userId: user.id }, db);
 
   const { update } = await useAppSession();
@@ -81,9 +89,7 @@ export async function logout(db: Kysely<DB>): Promise<void> {
 }
 
 // ## User ##
-export async function getUserBySession(
-  db: Kysely<DB>
-): Promise<UserDTO | null> {
+export async function getUserBySession(db: Kysely<DB>) {
   const appSession = await useAppSession();
   const sessionId = appSession.data.token.split(".")[0];
   const session = await getSession({ id: sessionId }, db);
@@ -92,92 +98,11 @@ export async function getUserBySession(
     return null;
   }
 
-  return await getUser({ id: session.userId }, db);
-}
-
-export async function getUserByEmail(
-  params: z.infer<ReturnType<typeof getUserByEmailSchema>>,
-  db: Kysely<DB>
-): Promise<UserDTO | null> {
-  const row = await db
+  return await db
     .selectFrom("user")
-    .where("email", "=", params.email)
+    .where("id", "=", session.userId)
     .selectAll()
-    .executeTakeFirst();
-
-  if (!row) {
-    return null;
-  }
-
-  return {
-    id: row.id,
-    email: row.email,
-    nickname: row.nickname,
-    role: row.role,
-    createdAt: row.createdAt,
-  };
-}
-
-export async function getUser(
-  params: z.infer<ReturnType<typeof getUserSchema>>,
-  db: Kysely<DB>
-): Promise<UserDTO | null> {
-  const row = await db
-    .selectFrom("user")
-    .where("id", "=", params.id)
-    .selectAll()
-    .executeTakeFirst();
-
-  if (!row) {
-    return null;
-  }
-
-  return {
-    id: row.id,
-    email: row.email,
-    nickname: row.nickname,
-    role: row.role,
-    createdAt: row.createdAt,
-  };
-}
-
-export async function setUser(
-  params: z.infer<ReturnType<typeof setUserSchema>>,
-  db: Kysely<DB>
-): Promise<UserDTO> {
-  const existingUser = await getUserByEmail(params, db);
-
-  if (existingUser) {
-    return updateUser({ ...params, id: existingUser.id }, db);
-  }
-
-  const row = await db
-    .insertInto("user")
-    .values({
-      id: ulid(),
-      email: params.email,
-      nickname: params.nickname,
-      password: params.password,
-      createdAt: new Date(),
-    })
-    .returningAll()
     .executeTakeFirstOrThrow();
-
-  return row;
-}
-
-export async function updateUser(
-  params: z.infer<ReturnType<typeof updateUserSchema>>,
-  db: Kysely<DB>
-): Promise<UserDTO> {
-  const row = await db
-    .updateTable("user")
-    .set(params)
-    .where("id", "=", params.id)
-    .returningAll()
-    .executeTakeFirstOrThrow();
-
-  return row;
 }
 
 // ## Session ##
@@ -208,7 +133,11 @@ export async function setSession(
   session: SessionDTO;
   token: string;
 }> {
-  const user = await getUser({ id: params.userId }, db);
+  const user = await db
+    .selectFrom("user")
+    .where("id", "=", params.userId)
+    .selectAll()
+    .executeTakeFirstOrThrow();
 
   if (!user) {
     throw new Error("User not found");

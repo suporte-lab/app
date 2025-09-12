@@ -32,118 +32,45 @@ import {
 } from "@/components/ui/sidebar";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { userQueryOptions } from "@/server/services/auth/functions";
-import { Building, Flag, User, Users } from "lucide-react";
+import { Building, CalendarSearch, Clipboard, Flag } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const data = {
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
+      title: "Painel Principal",
+      url: "/dashboard",
       icon: IconDashboard,
     },
     {
-      title: "Users",
-      url: "#",
-      icon: Users,
-    },
-    {
-      title: "Forms",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Municipalities",
-      url: "#",
+      title: "Municípios",
+      url: "/dashboard/municipality",
       icon: Flag,
     },
     {
-      title: "Projects",
-      url: "#",
+      title: "Projetos",
+      url: "/dashboard/project",
       icon: Building,
     },
-  ],
-  navClouds: [
     {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Formulários",
+      url: "/dashboard/survey",
+      icon: Clipboard,
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
+      title: "Pesquisas",
+      url: "/dashboard/research",
+      icon: CalendarSearch,
     },
     // {
-    //   title: "Get Help",
+    //   title: "Users",
     //   url: "#",
-    //   icon: IconHelp,
-    // },
-    // {
-    //   title: "Search",
-    //   url: "#",
-    //   icon: IconSearch,
+    //   icon: Users,
     // },
   ],
-  documents: [
-    // {
-    //   name: "Data Library",
-    //   url: "#",
-    //   icon: IconDatabase,
-    // },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    // {
-    //   name: "Word Assistant",
-    //   url: "#",
-    //   icon: IconFileWord,
-    // },
-  ],
+  navClouds: [],
+  navSecondary: [],
+  documents: [],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -158,18 +85,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <Link to="/dashboard">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">CincoBasicos</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {/* <NavDocuments items={data.documents} />
+        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
     </Sidebar>
