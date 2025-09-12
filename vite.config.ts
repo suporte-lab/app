@@ -9,5 +9,5 @@ export default defineConfig({
     port: 3000,
     allowedHosts: true,
   },
-  plugins: [tsConfigPaths(), tanstackStart(), tailwindcss()],
+  plugins: [tsConfigPaths(), tanstackStart({ target: "bun" }), tailwindcss()],
 });
