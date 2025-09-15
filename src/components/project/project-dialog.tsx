@@ -13,6 +13,8 @@ import { Eye, Mail, Phone, User } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Link } from "@tanstack/react-router";
+import { ResearchProjectCharts } from "../research/research-project-charts";
+import { ScrollArea } from "../ui/scroll-area";
 
 export function ProjectDialog({
   id,
@@ -55,40 +57,14 @@ export function ProjectDialog({
             {data.addressStreet}, {data.addressZipCode}
           </DialogDescription>
         </DialogHeader>
-        <div className="p-5 border rounded-md border-dashed flex gap-5">
-          <div className="bg-muted size-12 p-3 flex items-center justify-center rounded-md mb-4">
-            <User className="size-full" />
-          </div>
-          <div>
-            <div className="text-sm font-medium mb-0.5">
-              {data.responsibleRole}
-            </div>
-            <div className="text-lg truncate">
-              <p>{data.responsibleName}</p>
-            </div>
-
-            <div className="flex gap-2 mt-3">
-              {data.responsibleEmail?.length > 1 && (
-                <Badge variant="outline">
-                  <Mail className="size-4" />
-                  <p>{data.responsibleEmail}</p>
-                </Badge>
-              )}
-
-              {data.responsiblePhone && (
-                <Badge variant="outline">
-                  <Phone />
-                  <p>{data.responsiblePhone}</p>
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
+        <ScrollArea className="max-h-[80vh]">
+          <ResearchProjectCharts projectId={data.id} />
+        </ScrollArea>
 
         <DialogFooter className="flex justify-start">
           <Button size="sm" asChild>
             <Link to={viewLink ?? "/dashboard/project/$id"} params={{ id }}>
-              <Eye /> View project
+              <Eye /> Visualizar projeto
             </Link>
           </Button>
           <Button
@@ -96,7 +72,7 @@ export function ProjectDialog({
             size="sm"
             onClick={() => handleChange(false)}
           >
-            Close
+            Fechar
           </Button>
         </DialogFooter>
       </DialogContent>

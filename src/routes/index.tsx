@@ -14,7 +14,7 @@ function Home() {
     <PublicLayout>
       <div className="border-2 rounded-3xl overflow-hidden space-y-10">
         <img src="/hero_image.png" alt="CincoBasicos" className="w-full" />
-        <div className="flex flex-col items-center justify-center pb-10">
+        <div className="flex flex-col items-center justify-center pb-10 p-5">
           <img
             src="/logo.png"
             alt="CincoBasicos"
@@ -25,7 +25,7 @@ function Home() {
             infrastructure.
           </p>
           <div className="w-full max-w-sm h-0.5 rounded-full bg-slate-100 my-6"></div>
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6 grow-1">
             <Button variant="outline" asChild>
               <Link to="/monitoring">
                 <ChartBarIcon />

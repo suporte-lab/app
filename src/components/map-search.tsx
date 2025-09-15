@@ -82,8 +82,8 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
   );
 
   return (
-    <div className="flex size-full gap-5">
-      <div className="grow-1 shrink-0 max-w-80 flex flex-col gap-2">
+    <div className="flex flex-col xl:flex-row size-full gap-5">
+      <div className="xl:grow-1 shrink-0 xl:max-w-80 grid md:grid-cols-2 xl:flex flex-col gap-2">
         <div className="space-y-2 p-4 border border-dashed rounded-lg">
           <h3 className="text-sm font-medium flex items-center gap-1.5">
             <Flag className="size-3.5" />
@@ -156,7 +156,7 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
           }}
         />
       </div>
-      <div className="flex-1 grid size-full relative">
+      <div className="flex-1 grid aspect-square xl:aspect-auto xl:size-full relative">
         <div className="size-full transition-all rounded-2xl overflow-hidden relative isolate">
           <Map
             key={`${selectedMunicipality}-${locked}`}

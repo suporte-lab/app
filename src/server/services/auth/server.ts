@@ -91,6 +91,11 @@ export async function logout(db: Kysely<DB>): Promise<void> {
 // ## User ##
 export async function getUserBySession(db: Kysely<DB>) {
   const appSession = await useAppSession();
+
+  if (!appSession.data.token) {
+    return null;
+  }
+
   const sessionId = appSession.data.token.split(".")[0];
   const session = await getSession({ id: sessionId }, db);
 
