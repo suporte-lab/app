@@ -15,6 +15,7 @@ import { getSessionFn } from "@/server/services/auth/functions";
 export const Route = createRootRoute({
   beforeLoad: async () => {
     const session = await getSessionFn();
+
     return { session };
   },
   head: () => ({
