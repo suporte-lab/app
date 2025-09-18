@@ -86,7 +86,7 @@ function RouteComponent() {
         </div>
 
         <ProjectMapBanner id={project.id} />
-        <DashboardHeader title="Researchs" />
+        <DashboardHeader title="Pesquisas" />
         <ResearchProjectCharts projectId={project.id} />
       </div>
     </PublicLayout>

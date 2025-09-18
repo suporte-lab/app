@@ -186,37 +186,6 @@ export function MonitorPublicView() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2 p-4 border border-dashed rounded-lg">
-          <div className="gap-1 flex items-center justify-between">
-            <h3 className="text-sm font-medium flex items-center gap-1.5">
-              <Building className="size-3.5" />
-              Projetos
-            </h3>
-            {filterProjects.length > 0 && (
-              <Button
-                size="inline"
-                variant="underline"
-                className="text-sm p-0 gap-1 items-center"
-                onClick={() => {
-                  setFilterProjects([]);
-                }}
-              >
-                Limpar
-              </Button>
-            )}
-          </div>
-          <MultiSelect
-            placeholder="Selecione os projetos"
-            selectedLabel={"projeto" + (filterProjects.length > 1 ? "s" : "")}
-            options={projects.map((project) => ({
-              label: project.name,
-              value: project.id,
-            }))}
-            value={filterProjects}
-            onChange={(value) => setFilterProjects(value)}
-            size="w-72"
-          />
-        </div>
 
         <div className="space-y-2 p-4 border border-dashed rounded-lg">
           <div className="gap-1 flex items-center justify-between">
@@ -238,10 +207,8 @@ export function MonitorPublicView() {
             )}
           </div>
           <MultiSelect
-            placeholder="Selecione os equipamentos"
-            selectedLabel={
-              "equipamento" + (filterCategories.length > 1 ? "s" : "")
-            }
+            placeholder="Selecione os tipos"
+            selectedLabel={"tipo" + (filterCategories.length > 1 ? "s" : "")}
             options={categories.map((category) => ({
               label: category.name,
               value: category.id,
@@ -251,6 +218,41 @@ export function MonitorPublicView() {
             size="w-72"
           />
         </div>
+
+        <div className="space-y-2 p-4 border border-dashed rounded-lg">
+          <div className="gap-1 flex items-center justify-between">
+            <h3 className="text-sm font-medium flex items-center gap-1.5">
+              <Building className="size-3.5" />
+              Equipamentos
+            </h3>
+            {filterProjects.length > 0 && (
+              <Button
+                size="inline"
+                variant="underline"
+                className="text-sm p-0 gap-1 items-center"
+                onClick={() => {
+                  setFilterProjects([]);
+                }}
+              >
+                Limpar
+              </Button>
+            )}
+          </div>
+          <MultiSelect
+            placeholder="Selecione os equipamentos"
+            selectedLabel={
+              "equipamento" + (filterProjects.length > 1 ? "s" : "")
+            }
+            options={projects.map((project) => ({
+              label: project.name,
+              value: project.id,
+            }))}
+            value={filterProjects}
+            onChange={(value) => setFilterProjects(value)}
+            size="w-72"
+          />
+        </div>
+
         <div className="space-y-2 p-4 border border-dashed rounded-lg">
           <div className="gap-1 flex items-center justify-between">
             <h3 className="text-sm font-medium flex items-center gap-1.5">
@@ -383,7 +385,7 @@ export function MonitorPublicView() {
                 {filterProjects.length > 0 && (
                   <div className="border border-dashed rounded-lg p-4 flex gap-4">
                     <h3 className="font-medium py-3 min-w-20 text-slate-600">
-                      Projetos{" "}
+                      Equipamentos
                     </h3>
                     <div className="flex items-center gap-2.5 border-l py-3 px-4">
                       {filterProjects.map((project) => (

@@ -111,7 +111,7 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
             Pesquisa
           </h3>
           <Input
-            placeholder="Nome do projeto"
+            placeholder="Nome do equipamento"
             value={filterSearch}
             onChange={(e) => setFilterSearch(e.target.value)}
           />

@@ -6,8 +6,9 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="px-5 pt-3 flex items-center justify-between">
-        <Link to="/">
-          <h1 className="text-lg font-bold">CincoBasicos</h1>
+        <Link to="/" className="flex items-center gap-2 text-slate-600">
+          <img src="/favicon.png" alt="CincoBasicos" className="w-5" />
+          <h1 className="text-lg font-medium">Cinco Básicos</h1>
         </Link>
         <div className="grid grid-cols-3 gap-3">
           <Button variant="ghost" asChild>

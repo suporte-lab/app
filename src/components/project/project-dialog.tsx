@@ -64,7 +64,7 @@ export function ProjectDialog({
         <DialogFooter className="flex justify-start">
           <Button size="sm" asChild>
             <Link to={viewLink ?? "/dashboard/project/$id"} params={{ id }}>
-              <Eye /> Visualizar projeto
+              <Eye /> Visualizar equipamento
             </Link>
           </Button>
           <Button

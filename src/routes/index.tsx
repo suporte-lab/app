@@ -21,8 +21,7 @@ function Home() {
             className="w-2/3 max-w-sm mb-8"
           />
           <p className="text-lg max-w-prose text-center text-slate-500 font-medium">
-            CincoBasicos is a platform for monitoring and managing basic
-            infrastructure.
+            Acompanhe implementação do Cinco Básicos nos municípios parceiros
           </p>
           <div className="w-full max-w-sm h-0.5 rounded-full bg-slate-100 my-6"></div>
           <div className="grid grid-cols-2 gap-3 mb-6 grow-1">

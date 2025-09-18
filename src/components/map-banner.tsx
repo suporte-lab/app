@@ -28,6 +28,7 @@ export function MapBanner({
           zoom={12}
           center={center}
           locked={locked}
+          variant="colored"
         >
           {children}
         </Map>
