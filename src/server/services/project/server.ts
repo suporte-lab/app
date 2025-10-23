@@ -201,7 +201,7 @@ export async function setProjectsImport(
 
     let municipalityId: string | null
 
-    const existingMunicipality = await db.selectFrom("municipality").select(["id"]).where("state", "=", state.nome).where("name", "=", municipality.nome).executeTakeFirst()
+    const existingMunicipality = await db.selectFrom("municipality").select(["id"]).where("state", "=", state.nome).where("name", "=", municipality.nome.toUpperCase()).executeTakeFirst()
 
     if (existingMunicipality) {
       municipalityId = existingMunicipality.id
