@@ -14,6 +14,7 @@ import {
   getProjectsList,
   setProject,
   setProjectCategory,
+  setProjectsImport,
   softDeleteProject,
   softDeleteProjectCategory,
 } from "./server";
@@ -40,6 +41,23 @@ export const setProjectFn = createServerFn({ method: "POST" })
   .validator(setProjectSchema())
   .handler(async ({ data }) => {
     return await setProject(db, data);
+  });
+
+export const setProjectImportFn = createServerFn({ method: "POST" })
+  .validator((data) => {
+    if (data instanceof FormData) {
+      const id = String(data.get("id"))
+      const file = data.get("file")
+
+      if (file instanceof File) {
+        return { id, file }
+      }
+    }
+    throw new Error("Invalid data")
+
+  })
+  .handler(async ({ data }) => {
+    return await setProjectsImport(db, data);
   });
 
 export const softDeleteProjectFn = createServerFn({ method: "POST" })

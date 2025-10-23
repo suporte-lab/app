@@ -12,6 +12,7 @@ import {
   getSurveyQuestionsFn,
   getSurveysListFn,
   getQuestionsListFn,
+  getResearchQuestionsFn,
 } from "./functions";
 import { getResearchFn } from "./functions";
 import z from "zod";
@@ -59,6 +60,14 @@ export const getResearchResultsOptions = (
   queryOptions({
     queryKey: ["researchs", data.id, "results"],
     queryFn: () => getResearchResultsFn({ data }),
+  });
+
+export const getResearchQuestionsOptions = (
+  data: z.infer<ReturnType<typeof idSchema>>
+) =>
+  queryOptions({
+    queryKey: ["researchs", data.id, "questions"],
+    queryFn: () => getResearchQuestionsFn({ data }),
   });
 
 // Survey

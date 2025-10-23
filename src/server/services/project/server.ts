@@ -8,6 +8,9 @@ import {
 } from "./schemas";
 import { idSchema } from "@/server/utils/schemas";
 import { ulid } from "ulid";
+import Papa from "papaparse";
+import { fetchMunicipalities, fetchMunicipalityCords, fetchStates } from "../municipality/server";
+import { MunicipalityResponseDTO } from "../municipality/types";
 
 export async function getProjectsList(
   db: Kysely<DB>,
@@ -131,6 +134,179 @@ export async function setProject(
     .values({ id: ulid(), ...params })
     .returningAll()
     .execute();
+}
+
+export async function setProjectsImport(
+  db: Kysely<DB>,
+  params: {
+    id: string
+    file: File
+  }
+) {
+  let newRows = 0;
+
+  const text = await params.file.text()
+  const csv = Papa.parse(text, {
+    header: true,
+  })
+
+  if (!csv.data) {
+    throw new Error("Invalid data")
+  }
+
+  const states = await fetchStates()
+  const municipalities: Record<string, MunicipalityResponseDTO[]> = {}
+  const municipalitiesCords: Record<string, { latitude: number, longitude: number }> = {}
+
+  const errors: string[] = [];
+
+  for (let i = 0; i < csv.data.length; i++) {
+    const row = csv.data[i];
+
+    if (row instanceof Object !== true) {
+      errors.push(`Coluna ${i} invalida`)
+      continue
+    }
+
+    const values = Object.values(row)
+
+    const state = states.find(s => s.sigla === values[0])
+
+    if (!state) {
+      errors.push(`Coluna ${i} invalida. Estado nao existe.`)
+      continue
+    }
+
+    if (!municipalities[state.sigla]) {
+      municipalities[state.sigla] = await fetchMunicipalities({ id: state.sigla })
+    }
+
+    const municipality = municipalities[state.sigla].find(m => m.nome === String(values[1]).toUpperCase())
+
+    if (!municipality) {
+      errors.push(`Coluna ${i} invalida. Municipio nao existe.`)
+      continue
+    }
+
+    if (!municipalitiesCords[municipality.nome]) {
+      const data = await fetchMunicipalityCords({ name: municipality.nome, state: state.nome })
+
+      if (!data) {
+        errors.push(`Coluna ${i} invalida. Municipio invalido.`)
+        continue
+      }
+
+      municipalitiesCords[municipality.nome] = data
+    }
+
+    let municipalityId: string | null
+
+    const existingMunicipality = await db.selectFrom("municipality").select(["id"]).where("state", "=", state.nome).where("name", "=", municipality.nome).executeTakeFirst()
+
+    if (existingMunicipality) {
+      municipalityId = existingMunicipality.id
+    } else {
+      const newMunicipality = await db.insertInto("municipality").values({
+        id: ulid(),
+        name: municipality.nome,
+        state: state.nome,
+        longitude: municipalitiesCords[municipality.nome].longitude,
+        latitude: municipalitiesCords[municipality.nome].latitude
+      }).returning(["id"]).executeTakeFirstOrThrow()
+
+      municipalityId = newMunicipality.id
+    }
+
+    if (!values[2]) {
+      errors.push(`Coluna ${i} invalida. Categoria nao encontrada.`)
+      continue
+    }
+
+    let categoryId: string | null
+    const existingCategory = await db.selectFrom("projectCategory").select(["id"]).where("name", "=", values[2]).executeTakeFirst()
+    if (existingCategory) {
+      categoryId = existingCategory.id
+    } else {
+      const newCategory = await db.insertInto("projectCategory").values({
+        id: ulid(),
+        name: values[2]
+      }).returning(["id"]).executeTakeFirstOrThrow()
+
+      categoryId = newCategory.id
+    }
+
+    if (!categoryId) {
+      errors.push(`Coluna ${i} invalida. Categoria invalido.`)
+      continue
+    }
+
+    const street = values[8]
+    const number = values[9]
+    const zipCode = values[10]
+
+    if (!street || !zipCode || !number) {
+      errors.push(`Coluna ${i} invalida. Endereco invalido.`)
+      continue
+    }
+
+    const search = `${street},${number},${zipCode},${municipality.nome},Brasil`;
+
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${search}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
+    );
+
+    const data = await response.json();
+
+    if (!data.results[0]) {
+      errors.push(`Coluna ${i} invalida. Endereco nao encontrado.`)
+      continue
+    }
+
+    const lat = data.results[0].geometry.location.lat;
+    const lng = data.results[0].geometry.location.lng;
+
+    if (!lat || !lng) {
+      errors.push(`Coluna ${i} invalida. Endereco nao encontrado.`)
+      continue
+    }
+
+    const name = values[3]
+    const responsibleName = values[4]
+    const responsibleRole = values[5]
+    const responsiblePhone = values[6]
+    const responsibleEmail = values[7]
+
+    if (!name || !responsibleEmail) {
+      errors.push(`Coluna ${i} invalida. Verifique o nome e o email.`)
+      continue
+    }
+
+    const existingProject = await db.selectFrom("project").select(["id"]).where("name", "=", name).where("municipalityId", "=", municipalityId).executeTakeFirst()
+    if (existingProject) {
+      errors.push(`Coluna ${i} invalida. Unidade ja existe.`)
+      continue
+    }
+
+    await db.insertInto("project").values({
+      id: ulid(),
+      name,
+      responsibleName,
+      responsiblePhone,
+      responsibleRole,
+      responsibleEmail,
+      municipalityId,
+      categoryId,
+      addressStreet: street,
+      addressNumber: number,
+      addressZipCode: zipCode,
+      latitude: lat,
+      longitude: lng,
+    }).execute()
+
+    newRows++
+  }
+
+  return { newRows, errors }
 }
 
 export async function softDeleteProject(

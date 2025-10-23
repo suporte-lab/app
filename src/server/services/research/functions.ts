@@ -31,6 +31,8 @@ import {
   getResearchsResultsList,
   getQuestionsList,
   sendResearchRequestEmail,
+  getResearchQuestions,
+  setResearchImport,
 } from "./server";
 
 // Research
@@ -60,6 +62,12 @@ export const getResearchResultsFn = createServerFn({ method: "GET" })
     return await getResearchResults(db, data);
   });
 
+export const getResearchQuestionsFn = createServerFn({ method: "GET" })
+  .validator(idSchema())
+  .handler(async ({ data }) => {
+    return await getResearchQuestions(db, data);
+  });
+
 export const getResearchFn = createServerFn({ method: "GET" })
   .validator(idSchema())
   .handler(async ({ data }) => {
@@ -82,6 +90,23 @@ export const setResearchFn = createServerFn({ method: "POST" })
   .validator(setResearchSchema())
   .handler(async ({ data }) => {
     return await setResearch(db, data);
+  });
+
+export const setResearchImportFn = createServerFn({ method: "POST" })
+  .validator((data) => {
+    if (data instanceof FormData) {
+      const id = String(data.get("id"))
+      const file = data.get("file")
+
+      if (file instanceof File) {
+        return { id, file }
+      }
+    }
+    throw new Error("Invalid data")
+
+  })
+  .handler(async ({ data }) => {
+    return await setResearchImport(db, data);
   });
 
 export const softDeleteResearchFn = createServerFn({ method: "POST" })

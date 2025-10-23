@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { SurveyQuestionSetForm } from "@/components/research/survey-question-set-form";
 import { SurveyForm } from "@/components/research/survey-form";
+import { SurveySetForm } from "@/components/research/survey-set-form";
 
 export const Route = createFileRoute("/__authed/dashboard/survey/$id")({
   ssr: false,
@@ -39,15 +40,28 @@ function RouteComponent() {
       <DashboardHeader
         title={survey.name}
         right={
-          <SurveyQuestionSetForm
-            surveyId={id}
-            trigger={
-              <Button>
-                <Plus />
-                Adicionar pergunta
-              </Button>
-            }
-          />
+          <>
+            <SurveySetForm
+              survey={survey}
+              trigger={
+                <Button variant="outline">
+                  Editar
+                </Button>
+              }
+              onSuccess={(id) => {
+                console.log("id", id);
+              }}
+            />
+            <SurveyQuestionSetForm
+              surveyId={id}
+              trigger={
+                <Button>
+                  <Plus />
+                  Adicionar pergunta
+                </Button>
+              }
+            />
+          </>
         }
       />
       <div className="p-16 pb-24 flex flex-col text-center items-center justify-center border border-dashed rounded-md gap-16">

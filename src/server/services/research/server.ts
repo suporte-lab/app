@@ -1,3 +1,4 @@
+import Papa from 'papaparse'
 import { DB } from "@/server/db/types";
 import { Kysely } from "kysely";
 import { idSchema } from "@/server/utils/schemas";
@@ -139,6 +140,24 @@ export async function getResearchResultsByProjectId(
   return { results, questions, researchs };
 }
 
+export async function getResearchQuestions(db: Kysely<DB>, params: z.infer<ReturnType<typeof idSchema>>) {
+  const research = await db
+    .selectFrom("research")
+    .selectAll()
+    .where("id", "=", params.id)
+    .executeTakeFirstOrThrow();
+
+  const questionsData = await db
+    .selectFrom("surveyQuestion")
+    .selectAll()
+    .where("surveyId", "=", research.surveyId)
+    .where("isDeleted", "=", false)
+    .orderBy("position")
+    .execute();
+
+  return { questions: questionsData }
+}
+
 export async function getResearchResults(
   db: Kysely<DB>,
   params: z.infer<ReturnType<typeof idSchema>>
@@ -268,6 +287,60 @@ export async function setResearch(
     .values({ id: ulid(), ...params, municipalityId: params.municipalityId })
     .returningAll()
     .executeTakeFirstOrThrow();
+}
+
+export async function setResearchImport(
+  db: Kysely<DB>,
+  params: {
+    id: string
+    file: File
+  }
+) {
+  const text = await params.file.text()
+  const csv = Papa.parse(text, {
+    header: true,
+  })
+
+  if (!csv.data) {
+    throw new Error("Invalid data")
+  }
+
+  const research = await db.selectFrom("research").select(["surveyId", "id"]).where("id", "=", params.id).executeTakeFirstOrThrow()
+
+  for (let row of csv.data) {
+    if (row instanceof Object !== true) continue
+
+    const projectName = Object.values(row)[0];
+    const project = await db.selectFrom("project").select(["id"]).where("name", "=", projectName).executeTakeFirst();
+
+    if (!project) continue
+
+    for (let i = 1; i < Object.keys(row).length; i++) {
+      const questionName = Object.keys(row)[i]
+      const question = await db.selectFrom("surveyQuestion").select(["id"]).where("surveyId", "=", research.surveyId).where("question", "=", questionName).executeTakeFirst();
+
+      if (!question) continue
+
+      const answer = Object.values(row)[i]
+
+      if (!answer) continue
+
+      const existingAnswer = await db.selectFrom("surveyAnswer").select(["id"]).where("projectId", "=", project.id).where("researchId", "=", research.id).where("questionId", "=", question.id).where("surveyId", "=", research.surveyId).executeTakeFirst()
+
+      if (existingAnswer) {
+        await db.updateTable("surveyAnswer").set({ "answer": answer }).where("id", "=", existingAnswer.id).execute()
+      } else {
+        await db.insertInto("surveyAnswer").values({
+          "id": ulid(),
+          "projectId": project.id,
+          "researchId": research.id,
+          "surveyId": research.surveyId,
+          "questionId": question.id,
+          "answer": answer
+        }).execute()
+      }
+    }
+  }
 }
 
 export async function softDeleteResearch(

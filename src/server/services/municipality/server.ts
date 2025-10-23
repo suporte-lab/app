@@ -5,7 +5,6 @@ import z from "zod";
 import { ulid } from "ulid";
 import { idSchema } from "@/server/utils/schemas";
 import { MunicipalityResponseDTO, StateResponseDTO } from "./types";
-import { capitalize } from "@/lib/utils";
 
 export async function getMunicipalitiesList(db: Kysely<DB>) {
   const rows = await db

@@ -44,6 +44,7 @@
         "leaflet": "^1.9.4",
         "lucide-react": "^0.534.0",
         "next-themes": "^0.4.6",
+        "papaparse": "^5.5.3",
         "pg": "^8.16.3",
         "postcss": "^8.5.6",
         "react": "^19.0.0",
@@ -66,6 +67,8 @@
       },
       "devDependencies": {
         "@types/leaflet": "^1.9.20",
+        "@types/papaparse": "^5.3.16",
+        "@types/pg": "^8.15.5",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@types/sortablejs": "^1.15.8",
@@ -606,6 +609,10 @@
     "@types/node": ["@types/node@24.1.0", "", { "dependencies": { "undici-types": "~7.8.0" } }, "sha512-ut5FthK5moxFKH2T1CUOC6ctR67rQRvvHdFLCD2Ql6KXmMuCrjsSsRI9UsLCm9M18BMwClv4pn327UvB7eeO1w=="],
 
     "@types/normalize-package-data": ["@types/normalize-package-data@2.4.4", "", {}, "sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA=="],
+
+    "@types/papaparse": ["@types/papaparse@5.3.16", "", { "dependencies": { "@types/node": "*" } }, "sha512-T3VuKMC2H0lgsjI9buTB3uuKj3EMD2eap1MOuEQuBQ44EnDx/IkGhU6EwiTf9zG3za4SKlmwKAImdDKdNnCsXg=="],
+
+    "@types/pg": ["@types/pg@8.15.5", "", { "dependencies": { "@types/node": "*", "pg-protocol": "*", "pg-types": "^2.2.0" } }, "sha512-LF7lF6zWEKxuT3/OR8wAZGzkg4ENGXFNyiV/JeOt9z5B+0ZVwbql9McqX5c/WStFq1GaGso7H1AzP/qSzmlCKQ=="],
 
     "@types/react": ["@types/react@19.1.8", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-AwAfQ2Wa5bCx9WP8nZL2uMZWod7J7/JSplxbTmBQ5ms6QpqNYm672H0Vu9ZVKVngQ+ii4R/byguVEUZQyeg44g=="],
 
@@ -1350,6 +1357,8 @@
     "p-wait-for": ["p-wait-for@5.0.2", "", { "dependencies": { "p-timeout": "^6.0.0" } }, "sha512-lwx6u1CotQYPVju77R+D0vFomni/AqRfqLmqQ8hekklqZ6gAY9rONh7lBQ0uxWMkC2AuX9b2DVAl8To0NyP1JA=="],
 
     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+
+    "papaparse": ["papaparse@5.5.3", "", {}, "sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A=="],
 
     "parent-module": ["parent-module@1.0.1", "", { "dependencies": { "callsites": "^3.0.0" } }, "sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g=="],
 

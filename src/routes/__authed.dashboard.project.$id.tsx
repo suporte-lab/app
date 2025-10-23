@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { EditIcon, MapPin, Phone, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Map } from "@/components/map";
-import { MapMarker } from "@/components/map-marker";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getMunicipalitiesOptions } from "@/server/services/municipality/options";
@@ -30,8 +28,6 @@ function RouteComponent() {
   const { data: municipalities } = useQuery(getMunicipalitiesOptions());
   const { data: categories } = useQuery(getProjectCategoriesOptions());
 
-  // const { data: researchs } = useQuery(getProjectResearchsQueryOptions({ id }));
-
   if (!project) {
     return (
       <div className="flex flex-col gap-4">
@@ -46,24 +42,12 @@ function RouteComponent() {
   );
   const category = categories?.find((c) => c.id === project?.categoryId);
 
-  const questions: string[] = [];
-
-  // for (const research of Object.values(researchs ?? {})) {
-  //   for (const answer of research.answers) {
-  //     if (!["number"].includes(answer.type)) continue;
-
-  //     if (!questions.includes(answer.question)) {
-  //       questions.push(answer.question);
-  //     }
-  //   }
-  // }
-
   if (!municipality || !category) {
     return <Skeleton className="h-96 w-full" />;
   }
 
   return (
-    <DashboardLayout title="Project">
+    <DashboardLayout title="Unidade">
       <DashboardHeader
         title={project.name}
         right={
@@ -71,7 +55,7 @@ function RouteComponent() {
             trigger={
               <Button>
                 <EditIcon />
-                Edit
+                Editar
               </Button>
             }
             project={project}
@@ -137,7 +121,7 @@ function RouteComponent() {
       </div>
 
       <ProjectMapBanner id={project.id} />
-      <DashboardHeader title="Researchs" />
+      <DashboardHeader title="Pesquisas" />
       <ResearchProjectCharts projectId={project.id} />
 
       {/* {!researchs || !Object.keys(researchs).length ? (

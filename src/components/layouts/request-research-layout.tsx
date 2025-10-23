@@ -1,14 +1,9 @@
-import { AppSidebar } from "../app-sidebar";
-import { SidebarInset, SidebarProvider } from "../ui/sidebar";
-import { SiteHeader } from "../site-header";
 import { GalleryVerticalEnd } from "lucide-react";
 
 export function RequestResearchLayout({
-  children,
-  title,
+  children
 }: {
   children: React.ReactNode;
-  title?: string;
 }) {
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">

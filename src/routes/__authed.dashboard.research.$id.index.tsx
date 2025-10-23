@@ -4,7 +4,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getProjectsListOptions } from "@/server/services/project/options";
-import { getResearchOptions } from "@/server/services/research/options";
+import { getResearchOptions, getResearchQuestionsOptions } from "@/server/services/research/options";
 import { ResearchResultDataTable } from "@/components/research/research-result-data-table";
 import {
   Card,
@@ -17,8 +17,9 @@ import { Button } from "@/components/ui/button";
 import { sendResearchRequestEmailFn } from "@/server/services/research/functions";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { DownloadIcon, Mail } from "lucide-react";
+import { DownloadIcon, File, LinkIcon, Mail } from "lucide-react";
 import { getResearchResultsOptions } from "@/server/services/research/options";
+import { ResearchImportDialog } from "@/components/research/research-import-dialog";
 
 export const Route = createFileRoute("/__authed/dashboard/research/$id/")({
   ssr: false,
@@ -29,6 +30,7 @@ function RouteComponent() {
   const { id } = Route.useParams();
 
   const { data: research } = useQuery(getResearchOptions({ id }));
+  const { data: questions } = useQuery(getResearchQuestionsOptions({ id }));
   const { data: projects } = useQuery(getProjectsListOptions({}));
   const { data: results } = useQuery(getResearchResultsOptions({ id }));
 
@@ -56,6 +58,22 @@ function RouteComponent() {
     }
 
     return output;
+  }
+
+  function generateImportCSV() {
+    if (!questions || !projects) return
+    const headers = "Unidade," + questions.questions.map(q => q.question).join(",") + "\n"
+    const rows = projects.map(p => p.name).join(",\n")
+    const csv = headers + rows
+
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a");
+    a.href = url
+    a.download = "import.csv"
+    a.click()
+
+    window.URL.revokeObjectURL(url);
   }
 
   function downloadCSV() {
@@ -91,6 +109,16 @@ function RouteComponent() {
           <div className="flex gap-2">
             <Button
               variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/research/${research.id}/pick`)
+                toast.success("Link de envio copiado");
+              }}
+            >
+              <LinkIcon />
+              Enviar link
+            </Button>
+            <Button
+              variant="outline"
               onClick={() =>
                 sendMailRequest({ data: { id } }).then(() => {
                   toast.success("Emails enviados");
@@ -100,6 +128,12 @@ function RouteComponent() {
               <Mail />
               Enviar email
             </Button>
+            <ResearchImportDialog researchId={id}>
+              <Button variant="secondary">
+                <DownloadIcon />
+                Importar
+              </Button>
+            </ResearchImportDialog>
             <Button
               onClick={() => {
                 downloadCSV();

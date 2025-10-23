@@ -19,6 +19,8 @@ async function setAdmin(nickname: string) {
     .selectAll()
     .executeTakeFirst();
 
+  console.log(existingUser)
+
   if (existingUser) return;
 
   return db

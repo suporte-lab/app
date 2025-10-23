@@ -1,21 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/components/dashboard/header";
-import { Building2, Expand, MapPin, Phone, Trash2 } from "lucide-react";
+import { Building2, MapPin, Trash2 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Map } from "@/components/map";
-import { MapMarker } from "@/components/map-marker";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getMunicipalityOptions } from "@/server/services/municipality/options";
 import { ProjectDataTable } from "@/components/project/project-data-table";
 import { getProjectsListOptions } from "@/server/services/project/options";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import { useMap } from "react-leaflet";
-import { MapBanner } from "@/components/map-banner";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { deleteMunicipalityFn } from "@/server/services/municipality/functions";
 import { toast } from "sonner";
@@ -40,7 +34,7 @@ function RouteComponent() {
   const { mutate: deleteMunicipality } = useMutation({
     mutationFn: deleteMunicipalityFn,
     onSuccess: () => {
-      toast.success("Municipality deleted successfully");
+      toast.success("Apagado com sucesso.");
       navigate({ to: "/dashboard/municipality" });
     },
   });
@@ -55,7 +49,7 @@ function RouteComponent() {
   }
 
   return (
-    <DashboardLayout title="Municipality">
+    <DashboardLayout title="Município">
       <DashboardHeader
         title={municipality.name}
         right={

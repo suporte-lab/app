@@ -86,7 +86,7 @@ export function ProjectCategorySetForm({
         <DialogHeader>
           <DialogTitle>Definir categoria</DialogTitle>
           <DialogDescription>
-            Defina uma categoria de projeto para categorizar projetos.
+            Defina uma categoria de unidade para categorizar unidades.
           </DialogDescription>
         </DialogHeader>
 

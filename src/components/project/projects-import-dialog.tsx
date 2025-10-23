@@ -1,0 +1,98 @@
+import { DialogDescription } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import { setProjectImportFn } from "@/server/services/project/functions";
+
+export function ProjectsImportDialog({ children }: { children: React.ReactNode }) {
+  const { mutate, isPending } = useMutation({
+    mutationFn: setProjectImportFn,
+    onMutate: () => {
+      toast.loading("A processar novos dados...", { id: "import" })
+    },
+    onSuccess: (data) => {
+      toast.success(`Projetos criados com sucesso: ${data.newRows}`, { id: "import" })
+    }
+
+  })
+
+  const [importFile, setImportFile] = useState<File | null>(null)
+
+  function generateImportCSV() {
+    const headers = "Estado(SP),Municipio,Categoria,Unidade,Responsavel(Nome),Responsavel(Cargo),Responsavel(Telefone),Responsavel(Email),Rua,Numero,CEP"
+    const csv = headers
+
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a");
+    a.href = url
+    a.download = "import.csv"
+    a.click()
+
+    window.URL.revokeObjectURL(url);
+  }
+
+  function importData() {
+    if (!importFile) return
+
+    const formData = new FormData();
+    formData.append('file', importFile)
+
+    mutate({ data: formData })
+  }
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Importar dados</DialogTitle>
+          <DialogDescription>Use o ficheiro para importar abaixo.</DialogDescription>
+        </DialogHeader>
+        <div>
+          <form>
+            <label htmlFor="file-input" className="sr-only">Choose file</label>
+            <input type="file" name="file-input" id="file-input" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
+    file:bg-gray-50 file:border-0
+    file:me-4
+    file:py-3 file:px-4
+   "
+              onChange={(e) => {
+                if (!e.target.files) {
+                  setImportFile(null)
+                  return
+                }
+
+                const file = e.target.files[0]
+
+                if (file.type != "text/csv") {
+                  setImportFile(null)
+                  toast.error("Ficheiro invalido")
+                  return
+                }
+
+                setImportFile(e.target.files[0])
+                console.log(e.target.files)
+              }}
+              accept=".csv,text/csv"
+              multiple={false}
+            />
+          </form>
+        </div>
+        <div className="flex gap-2">
+          <Button disabled={!importFile || isPending} onClick={() => importData()}>Importar</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              generateImportCSV();
+            }}
+          >
+            Gerar ficheiro tabela
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

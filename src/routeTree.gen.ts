@@ -17,6 +17,7 @@ import { Route as _authedRouteImport } from './routes/__authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectIdIndexRouteImport } from './routes/project.$id.index'
 import { Route as _authedDashboardIndexRouteImport } from './routes/__authed.dashboard.index'
+import { Route as ResearchIdPickRouteImport } from './routes/research.$id.pick'
 import { Route as ProjectIdSurveyRouteImport } from './routes/project.$id.survey'
 import { Route as _authedDashboardSurveyIndexRouteImport } from './routes/__authed.dashboard.survey.index'
 import { Route as _authedDashboardResearchIndexRouteImport } from './routes/__authed.dashboard.research.index'
@@ -66,6 +67,11 @@ const _authedDashboardIndexRoute = _authedDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
   getParentRoute: () => _authedRoute,
+} as any)
+const ResearchIdPickRoute = ResearchIdPickRouteImport.update({
+  id: '/research/$id/pick',
+  path: '/research/$id/pick',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectIdSurveyRoute = ProjectIdSurveyRouteImport.update({
   id: '/project/$id/survey',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/monitoring': typeof MonitoringRoute
   '/register': typeof RegisterRoute
   '/project/$id/survey': typeof ProjectIdSurveyRoute
+  '/research/$id/pick': typeof ResearchIdPickRoute
   '/dashboard': typeof _authedDashboardIndexRoute
   '/project/$id': typeof ProjectIdIndexRoute
   '/dashboard/category/$id': typeof _authedDashboardCategoryIdRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/monitoring': typeof MonitoringRoute
   '/register': typeof RegisterRoute
   '/project/$id/survey': typeof ProjectIdSurveyRoute
+  '/research/$id/pick': typeof ResearchIdPickRoute
   '/dashboard': typeof _authedDashboardIndexRoute
   '/project/$id': typeof ProjectIdIndexRoute
   '/dashboard/category/$id': typeof _authedDashboardCategoryIdRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/monitoring': typeof MonitoringRoute
   '/register': typeof RegisterRoute
   '/project/$id/survey': typeof ProjectIdSurveyRoute
+  '/research/$id/pick': typeof ResearchIdPickRoute
   '/__authed/dashboard/': typeof _authedDashboardIndexRoute
   '/project/$id/': typeof ProjectIdIndexRoute
   '/__authed/dashboard/category/$id': typeof _authedDashboardCategoryIdRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/monitoring'
     | '/register'
     | '/project/$id/survey'
+    | '/research/$id/pick'
     | '/dashboard'
     | '/project/$id'
     | '/dashboard/category/$id'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/monitoring'
     | '/register'
     | '/project/$id/survey'
+    | '/research/$id/pick'
     | '/dashboard'
     | '/project/$id'
     | '/dashboard/category/$id'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/monitoring'
     | '/register'
     | '/project/$id/survey'
+    | '/research/$id/pick'
     | '/__authed/dashboard/'
     | '/project/$id/'
     | '/__authed/dashboard/category/$id'
@@ -255,6 +267,7 @@ export interface RootRouteChildren {
   MonitoringRoute: typeof MonitoringRoute
   RegisterRoute: typeof RegisterRoute
   ProjectIdSurveyRoute: typeof ProjectIdSurveyRoute
+  ResearchIdPickRoute: typeof ResearchIdPickRoute
   ProjectIdIndexRoute: typeof ProjectIdIndexRoute
 }
 
@@ -315,6 +328,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof _authedDashboardIndexRouteImport
       parentRoute: typeof _authedRoute
+    }
+    '/research/$id/pick': {
+      id: '/research/$id/pick'
+      path: '/research/$id/pick'
+      fullPath: '/research/$id/pick'
+      preLoaderRoute: typeof ResearchIdPickRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/project/$id/survey': {
       id: '/project/$id/survey'
@@ -427,6 +447,7 @@ const rootRouteChildren: RootRouteChildren = {
   MonitoringRoute: MonitoringRoute,
   RegisterRoute: RegisterRoute,
   ProjectIdSurveyRoute: ProjectIdSurveyRoute,
+  ResearchIdPickRoute: ResearchIdPickRoute,
   ProjectIdIndexRoute: ProjectIdIndexRoute,
 }
 export const routeTree = rootRouteImport

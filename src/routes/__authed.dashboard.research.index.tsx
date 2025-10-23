@@ -4,9 +4,6 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ResearchSetForm } from "@/components/research/research-set-form";
-import { ResearchCard } from "@/components/research/research-card";
-import { useQuery } from "@tanstack/react-query";
-import { getResearchsListOptions } from "@/server/services/research/options";
 import { ResearchDataTable } from "@/components/research/research-data-table";
 
 export const Route = createFileRoute("/__authed/dashboard/research/")({
@@ -15,8 +12,6 @@ export const Route = createFileRoute("/__authed/dashboard/research/")({
 });
 
 function RouteComponent() {
-  const { data: researchs } = useQuery(getResearchsListOptions());
-
   return (
     <DashboardLayout title="Pesquisas">
       <DashboardHeader

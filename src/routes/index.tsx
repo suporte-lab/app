@@ -2,7 +2,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicLayout } from "@/components/layouts/public-layout";
 import { Button } from "@/components/ui/button";
-import { ChartBarIcon, MapIcon, HomeIcon } from "lucide-react";
+import { ChartBarIcon, MapIcon } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   ssr: false,

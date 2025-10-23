@@ -48,7 +48,7 @@ const data = {
       icon: Flag,
     },
     {
-      title: "Projetos",
+      title: "Unidades",
       url: "/dashboard/project",
       icon: Building,
     },

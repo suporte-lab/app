@@ -75,7 +75,7 @@ export function ProjectSetForm({
         form.reset(defaultValues);
       }, 100);
 
-      toast.success("Projeto definido com sucesso");
+      toast.success("Unidade definida com sucesso");
 
       onSuccess?.();
     },
@@ -112,7 +112,7 @@ export function ProjectSetForm({
           {trigger === true ? (
             <Button>
               <Plus />
-              Adicionar projeto
+              Adicionar unidade
             </Button>
           ) : (
             trigger
@@ -121,9 +121,9 @@ export function ProjectSetForm({
       )}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Definir projeto</DialogTitle>
+          <DialogTitle>Definir unidade</DialogTitle>
           <DialogDescription>
-            Defina um novo projeto em um dos seus municípios.
+            Defina uma nova unidade em um dos seus municípios.
           </DialogDescription>
         </DialogHeader>
 
@@ -374,6 +374,7 @@ function CoordinatesFinder({
       );
 
       const data = await response.json();
+      console.log(data)
 
       const lat = data.results[0].geometry.location.lat;
       const lng = data.results[0].geometry.location.lng;

@@ -155,7 +155,7 @@ export function Actions({ projectId }: { projectId: string }) {
         <DropdownMenuLabel>Ações</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={(e) => {
+          onSelect={() => {
             navigator.clipboard.writeText(
               `${window.location.origin}/project/${projectId}/survey`
             );
