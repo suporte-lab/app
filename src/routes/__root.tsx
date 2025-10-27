@@ -14,12 +14,13 @@ import { getSessionFn } from "../server/services/auth/functions";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
-    try {
-      const session = await getSessionFn();
-      return { session };
-    } catch {
-      return { session: null }
-    }
+    return { session: null }
+    // try {
+    //   const session = await getSessionFn();
+    //   return { session };
+    // } catch {
+    //   return { session: null }
+    // }
   },
   head: () => ({
     meta: [
