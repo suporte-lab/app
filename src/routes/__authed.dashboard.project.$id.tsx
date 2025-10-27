@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { ProjectSetForm } from "@/components/project/project-set-form";
 import { Button } from "@/components/ui/button";
-import { EditIcon, MapPin, Phone, User } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { EditIcon, MapPin, Phone, Trash2Icon, User } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,9 @@ import {
 } from "@/server/services/project/options";
 import { ProjectMapBanner } from "@/components/project/project-map-banner";
 import { ResearchProjectCharts } from "@/components/research/research-project-charts";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { softDeleteProjectFn } from "@/server/services/project/functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/__authed/dashboard/project/$id")({
   ssr: false,
@@ -23,10 +26,20 @@ export const Route = createFileRoute("/__authed/dashboard/project/$id")({
 
 function RouteComponent() {
   const { id } = Route.useParams();
+  const navigate = useNavigate()
 
   const { data: project } = useQuery(getProjectOptions({ id }));
   const { data: municipalities } = useQuery(getMunicipalitiesOptions());
   const { data: categories } = useQuery(getProjectCategoriesOptions());
+
+  const { mutate: deleteProject } = useMutation({
+    mutationFn: softDeleteProjectFn,
+    onSuccess: () => {
+      toast.success("Apagado com sucesso.");
+      navigate({ to: "/dashboard/project" });
+    },
+  });
+
 
   if (!project) {
     return (
@@ -51,15 +64,28 @@ function RouteComponent() {
       <DashboardHeader
         title={project.name}
         right={
-          <ProjectSetForm
-            trigger={
-              <Button>
-                <EditIcon />
-                Editar
+          <>
+            <ConfirmDialog
+              title="Deletar município"
+              onConfirm={() => {
+                deleteProject({ data: { id } });
+              }}
+            >
+              <Button variant="outline">
+                <Trash2Icon />
+                Apagar
               </Button>
-            }
-            project={project}
-          />
+            </ConfirmDialog>
+            <ProjectSetForm
+              trigger={
+                <Button>
+                  <EditIcon />
+                  Editar
+                </Button>
+              }
+              project={project}
+            />
+          </>
         }
       />
       <div className="flex gap-2 ">

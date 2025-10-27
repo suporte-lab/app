@@ -27,3 +27,13 @@ export function slugify(value: string) {
 export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
+
+export function isBooleanLike(value: unknown) {
+  return (
+    typeof value === 'boolean' ||
+    value === 'true' ||
+    value === 'false' ||
+    value === 1 ||
+    value === 0
+  );
+}

@@ -1,4 +1,6 @@
 import { DB } from "@/server/db/types";
+import chardet from "chardet"
+import iconv from "iconv-lite"
 import { Kysely } from "kysely";
 import z from "zod";
 import {
@@ -145,10 +147,16 @@ export async function setProjectsImport(
 ) {
   let newRows = 0;
 
-  const text = await params.file.text()
-  const csv = Papa.parse(text, {
-    header: true,
-  })
+  const arrayBuffer = await params.file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const encoding = chardet.detect(buffer);
+
+  if (!encoding) {
+    throw new Error("File decoding failed")
+  }
+
+  const utf8string = iconv.decode(buffer, encoding)
+  const csv = Papa.parse(utf8string, { header: true })
 
   if (!csv.data) {
     throw new Error("Invalid data")
@@ -158,13 +166,13 @@ export async function setProjectsImport(
   const municipalities: Record<string, MunicipalityResponseDTO[]> = {}
   const municipalitiesCords: Record<string, { latitude: number, longitude: number }> = {}
 
-  const errors: string[] = [];
+  const log: { type: string; message: string }[] = [];
 
   for (let i = 0; i < csv.data.length; i++) {
     const row = csv.data[i];
 
     if (row instanceof Object !== true) {
-      errors.push(`Coluna ${i} invalida`)
+      log.push({ type: "error", message: `Coluna ${i} inválida` })
       continue
     }
 
@@ -173,7 +181,7 @@ export async function setProjectsImport(
     const state = states.find(s => s.sigla === values[0])
 
     if (!state) {
-      errors.push(`Coluna ${i} invalida. Estado nao existe.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Estado nao existe.` })
       continue
     }
 
@@ -184,7 +192,7 @@ export async function setProjectsImport(
     const municipality = municipalities[state.sigla].find(m => m.nome === String(values[1]).toUpperCase())
 
     if (!municipality) {
-      errors.push(`Coluna ${i} invalida. Municipio nao existe.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Municipio nao existe.` })
       continue
     }
 
@@ -192,7 +200,7 @@ export async function setProjectsImport(
       const data = await fetchMunicipalityCords({ name: municipality.nome, state: state.nome })
 
       if (!data) {
-        errors.push(`Coluna ${i} invalida. Municipio invalido.`)
+        log.push({ type: "error", message: `Coluna ${i} inválida. Municipio invalido.` })
         continue
       }
 
@@ -201,15 +209,17 @@ export async function setProjectsImport(
 
     let municipalityId: string | null
 
-    const existingMunicipality = await db.selectFrom("municipality").select(["id"]).where("state", "=", state.nome).where("name", "=", municipality.nome.toUpperCase()).executeTakeFirst()
+    const existingMunicipality = await db.selectFrom("municipality").select(["id"]).where("state", "=", state.sigla).where("name", "=", municipality.nome).executeTakeFirst()
 
     if (existingMunicipality) {
       municipalityId = existingMunicipality.id
+
+      await db.updateTable("municipality").set({ isDeleted: false }).where("id", "=", municipalityId).execute()
     } else {
       const newMunicipality = await db.insertInto("municipality").values({
         id: ulid(),
         name: municipality.nome,
-        state: state.nome,
+        state: state.sigla,
         longitude: municipalitiesCords[municipality.nome].longitude,
         latitude: municipalitiesCords[municipality.nome].latitude
       }).returning(["id"]).executeTakeFirstOrThrow()
@@ -218,7 +228,7 @@ export async function setProjectsImport(
     }
 
     if (!values[2]) {
-      errors.push(`Coluna ${i} invalida. Categoria nao encontrada.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Categoria nao existe.` })
       continue
     }
 
@@ -236,7 +246,7 @@ export async function setProjectsImport(
     }
 
     if (!categoryId) {
-      errors.push(`Coluna ${i} invalida. Categoria invalido.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Categoria inválida.` })
       continue
     }
 
@@ -245,7 +255,7 @@ export async function setProjectsImport(
     const zipCode = values[10]
 
     if (!street || !zipCode || !number) {
-      errors.push(`Coluna ${i} invalida. Endereco invalido.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Endereço inválido.` })
       continue
     }
 
@@ -258,7 +268,7 @@ export async function setProjectsImport(
     const data = await response.json();
 
     if (!data.results[0]) {
-      errors.push(`Coluna ${i} invalida. Endereco nao encontrado.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Endereço não encontrado.` })
       continue
     }
 
@@ -266,7 +276,7 @@ export async function setProjectsImport(
     const lng = data.results[0].geometry.location.lng;
 
     if (!lat || !lng) {
-      errors.push(`Coluna ${i} invalida. Endereco nao encontrado.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Endereço não encontrado.` })
       continue
     }
 
@@ -277,13 +287,13 @@ export async function setProjectsImport(
     const responsibleEmail = values[7]
 
     if (!name || !responsibleEmail) {
-      errors.push(`Coluna ${i} invalida. Verifique o nome e o email.`)
+      log.push({ type: "error", message: `Coluna ${i} inválida. Obrigatório nome e email do responsável.` })
       continue
     }
 
     const existingProject = await db.selectFrom("project").select(["id"]).where("name", "=", name).where("municipalityId", "=", municipalityId).executeTakeFirst()
     if (existingProject) {
-      errors.push(`Coluna ${i} invalida. Unidade ja existe.`)
+      log.push({ type: "warning", message: `Coluna ${i} inválida. Unidade já existe.` })
       continue
     }
 
@@ -303,10 +313,12 @@ export async function setProjectsImport(
       longitude: lng,
     }).execute()
 
+    log.push({ type: "success", message: `Coluna ${i} criada com sucesso.` })
+
     newRows++
   }
 
-  return { newRows, errors }
+  return { newRows, log }
 }
 
 export async function softDeleteProject(

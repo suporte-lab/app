@@ -42,29 +42,31 @@ export function ConfirmDialog({
         </DialogTrigger>
       )}
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title ?? "Are you sure?"}</DialogTitle>
-          <DialogDescription>
-            {description ?? "This action cannot be undone."}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+        <div className="space-y-4">
+          <DialogHeader>
+            <DialogTitle>{title ?? "Tem a certeza?"}</DialogTitle>
+            <DialogDescription>
+              {description ?? "Esta ação não pode ser revertida."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-              onConfirm();
-              setOpenInternal(false);
-              onOpenChange?.(false);
-            }}
-          >
-            Delete
-          </Button>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-        </DialogFooter>
+                onConfirm();
+                setOpenInternal(false);
+                onOpenChange?.(false);
+              }}
+            >
+              Apagar permanentemente
+            </Button>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

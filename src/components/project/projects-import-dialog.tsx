@@ -5,17 +5,20 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { setProjectImportFn } from "@/server/services/project/functions";
+import { cn } from "@/lib/utils";
 
 export function ProjectsImportDialog({ children }: { children: React.ReactNode }) {
+  const [log, setLog] = useState<{ type: string; message: string }[]>([])
+
   const { mutate, isPending } = useMutation({
     mutationFn: setProjectImportFn,
     onMutate: () => {
       toast.loading("A processar novos dados...", { id: "import" })
     },
     onSuccess: (data) => {
+      setLog(data.log)
       toast.success(`Projetos criados com sucesso: ${data.newRows}`, { id: "import" })
     }
-
   })
 
   const [importFile, setImportFile] = useState<File | null>(null)
@@ -47,52 +50,64 @@ export function ProjectsImportDialog({ children }: { children: React.ReactNode }
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Importar dados</DialogTitle>
-          <DialogDescription>Use o ficheiro para importar abaixo.</DialogDescription>
-        </DialogHeader>
-        <div>
-          <form>
-            <label htmlFor="file-input" className="sr-only">Choose file</label>
-            <input type="file" name="file-input" id="file-input" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
+        <div className="space-y-4">
+          <DialogHeader>
+            <DialogTitle>Importar dados</DialogTitle>
+            <DialogDescription>Use o ficheiro para importar abaixo.</DialogDescription>
+          </DialogHeader>
+          <div>
+            <form>
+              <label htmlFor="file-input" className="sr-only">Choose file</label>
+              <input type="file" name="file-input" id="file-input" className="block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none
     file:bg-gray-50 file:border-0
     file:me-4
     file:py-3 file:px-4
    "
-              onChange={(e) => {
-                if (!e.target.files) {
-                  setImportFile(null)
-                  return
-                }
+                onChange={(e) => {
+                  if (!e.target.files) {
+                    setImportFile(null)
+                    return
+                  }
 
-                const file = e.target.files[0]
+                  const file = e.target.files[0]
 
-                if (file.type != "text/csv") {
-                  setImportFile(null)
-                  toast.error("Ficheiro invalido")
-                  return
-                }
+                  if (file.type != "text/csv") {
+                    setImportFile(null)
+                    toast.error("Ficheiro invalido")
+                    return
+                  }
 
-                setImportFile(e.target.files[0])
-                console.log(e.target.files)
+                  setImportFile(e.target.files[0])
+                  console.log(e.target.files)
+                }}
+                accept=".csv,text/csv"
+                multiple={false}
+              />
+            </form>
+          </div>
+          <div className="flex gap-2">
+            <Button disabled={!importFile || isPending} onClick={() => importData()}>Importar</Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                generateImportCSV();
               }}
-              accept=".csv,text/csv"
-              multiple={false}
-            />
-          </form>
-        </div>
-        <div className="flex gap-2">
-          <Button disabled={!importFile || isPending} onClick={() => importData()}>Importar</Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              generateImportCSV();
-            }}
-          >
-            Gerar ficheiro tabela
-          </Button>
+            >
+              Gerar ficheiro tabela
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {log.map(item => (
+              <div className={cn(
+                "px-3 font-medium py-2 rounded-md text-foreground bg-foreground/10 text-xs",
+                item.type == "error" && "text-destructive bg-destructive/10",
+                item.type == "warning" && "text-amber-700 bg-amber-500/15",
+                item.type == "success" && "text-green-700 bg-green-500/15"
+              )}>{item.message}</div>
+            ))}
+          </div>
         </div>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   )
 }

@@ -41,7 +41,7 @@ function RouteComponent() {
   );
   const category = categories?.find((c) => c.id === project?.categoryId);
 
-  if (!municipality || !category) {
+  if (!category) {
     return <Skeleton className="h-96 w-full" />;
   }
 
@@ -75,7 +75,7 @@ function RouteComponent() {
 
               <div className="flex gap-1">
                 <Badge variant="outline" size="lg">
-                  {municipality.name}
+                  {municipality?.name}
                 </Badge>
                 <Badge variant="outline" size="lg">
                   {category?.name}

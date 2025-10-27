@@ -14,6 +14,7 @@ import {
 import { ulid } from "ulid";
 import { Resend } from "resend";
 import { mailShareLinkTemplate } from "@/server/utils/mail";
+import { isBooleanLike } from '@/lib/utils';
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -296,6 +297,10 @@ export async function setResearchImport(
     file: File
   }
 ) {
+  let newRows = 0
+  const log: { type: string, message: string }[] = []
+  const invalidRows: string[] = []
+
   const text = await params.file.text()
   const csv = Papa.parse(text, {
     header: true,
@@ -307,7 +312,9 @@ export async function setResearchImport(
 
   const research = await db.selectFrom("research").select(["surveyId", "id"]).where("id", "=", params.id).executeTakeFirstOrThrow()
 
-  for (let row of csv.data) {
+  for (let i = 0; i < csv.data.length; i++) {
+    const row = csv.data[i]
+
     if (row instanceof Object !== true) continue
 
     const projectName = Object.values(row)[0];
@@ -315,20 +322,63 @@ export async function setResearchImport(
 
     if (!project) continue
 
-    for (let i = 1; i < Object.keys(row).length; i++) {
-      const questionName = Object.keys(row)[i]
-      const question = await db.selectFrom("surveyQuestion").select(["id"]).where("surveyId", "=", research.surveyId).where("question", "=", questionName).executeTakeFirst();
+    for (let x = 1; x < Object.keys(row).length; x++) {
+      const questionName = Object.keys(row)[x]
+      const question = await db.selectFrom("surveyQuestion").select(["id", "type"]).where("surveyId", "=", research.surveyId).where("question", "=", questionName).executeTakeFirst();
 
       if (!question) continue
 
-      const answer = Object.values(row)[i]
+      const answer = Object.values(row)[x]
 
       if (!answer) continue
+
+      if (question.type == "number" && Number.isFinite(Number(answer)) === false) {
+        log.push({ "type": "error", message: `Linha ${i}, Coluna ${x} inválida. Precisa de ser um número.` })
+
+        invalidRows.push(project.id)
+        continue
+      }
+
+      if (question.type == "boolean" && isBooleanLike(answer)) {
+        log.push({ "type": "error", message: `Linha ${i}, Coluna ${x} inválida. Precisa de ser um true/false.` })
+
+        invalidRows.push(project.id)
+        continue
+      }
+
+      if (question.type == "select") {
+        const rows = await db.selectFrom("surveyQuestionMetadata").select(["value"]).where("surveyQuestionId", "=", question.id).execute() ?? []
+        const options = rows.map(r => r.value) ?? []
+        const isValid = options.includes(answer)
+
+        if (!isValid) {
+          log.push({ "type": "error", message: `Linha ${i}, Coluna ${x} inválida. Precisa de ser uma das seguintes respostas ("${options.join(", ")}").` })
+          invalidRows.push(project.id)
+          continue
+        }
+      }
+    }
+
+    if (invalidRows.includes(project.id)) continue
+
+    for (let x = 1; x < Object.keys(row).length; x++) {
+      const questionName = Object.keys(row)[x]
+      const question = await db.selectFrom("surveyQuestion").select(["id", "type"]).where("surveyId", "=", research.surveyId).where("question", "=", questionName).executeTakeFirst();
+
+      if (!question) continue
+
+      const answer = Object.values(row)[x]
+
+      if (!answer) continue
+
+      console.log(answer)
 
       const existingAnswer = await db.selectFrom("surveyAnswer").select(["id"]).where("projectId", "=", project.id).where("researchId", "=", research.id).where("questionId", "=", question.id).where("surveyId", "=", research.surveyId).executeTakeFirst()
 
       if (existingAnswer) {
         await db.updateTable("surveyAnswer").set({ "answer": answer }).where("id", "=", existingAnswer.id).execute()
+
+        newRows++
       } else {
         await db.insertInto("surveyAnswer").values({
           "id": ulid(),
@@ -338,9 +388,17 @@ export async function setResearchImport(
           "questionId": question.id,
           "answer": answer
         }).execute()
+
+        newRows++
+      }
+
+      if (!log.find(l => l.message == `Linha ${i} atualizada com sucesso.`)) {
+        log.push({ type: "success", message: `Linha ${i} atualizada com sucesso.` })
       }
     }
   }
+
+  return { newRows, log }
 }
 
 export async function softDeleteResearch(
