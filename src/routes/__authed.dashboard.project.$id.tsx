@@ -149,7 +149,7 @@ function RouteComponent() {
       <ProjectMapBanner id={project.id} />
       <DashboardHeader title="Pesquisas" />
       <ResearchProjectCharts projectId={project.id} />
-
+      andre
       {/* {!researchs || !Object.keys(researchs).length ? (
         <div className="flex flex-col gap-4">Researchs not found</div>
       ) : (

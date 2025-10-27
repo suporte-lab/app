@@ -5,6 +5,7 @@ import { PublicLayout } from "@/components/layouts/public-layout";
 
 export const Route = createFileRoute("/map")({
   component: Home,
+  ssr: false,
 });
 
 function Home() {

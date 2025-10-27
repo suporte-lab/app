@@ -10,13 +10,16 @@ import {
 
 import styles from "../styles/app.css?url";
 import { Toaster } from "sonner";
-import { getSessionFn } from "@/server/services/auth/functions";
+import { getSessionFn } from "../server/services/auth/functions";
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
-    const session = await getSessionFn();
-
-    return { session };
+    try {
+      const session = await getSessionFn();
+      return { session };
+    } catch {
+      return { session: null }
+    }
   },
   head: () => ({
     meta: [
