@@ -1,5 +1,4 @@
 // src/services/session.server.ts
-import { SessionDTO } from "@/server/services/auth/types";
 import { useSession } from "@tanstack/react-start/server";
 
 export function useAppSession() {
