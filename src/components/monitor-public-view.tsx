@@ -62,13 +62,13 @@ export function MonitorPublicView() {
   const projectsMap = new Map(projects.map((p) => [p.id, p]));
 
   const [chartData, setChartData] = useState<
-    { name: string; [key: string]: number | string }[]
+    { name: string;[key: string]: number | string }[]
   >([]);
 
   const question = questions.find((q) => q.id === selectedQuestion);
 
   function getChartData(selectedQuestion: string) {
-    const data: { name: string; [key: string]: number | string }[] = [];
+    const data: { name: string;[key: string]: number | string }[] = [];
 
     for (const [researchId, research] of Object.entries(
       researchsResults.researchs
@@ -142,20 +142,8 @@ export function MonitorPublicView() {
       }
     }
 
-    console.log(data);
-
     return data;
   }
-
-  // useEffect(() => {
-  //   getChartData();
-  // }, [
-  //   selectedMunicipality,
-  //   selectedQuestion,
-  //   filterProjects,
-  //   filterResearchs,
-  //   filterCategories,
-  // ]);
 
   return (
     <div className="flex flex-col xl:flex-row  size-full items-start gap-5 relative">
@@ -476,8 +464,6 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
     }
   }
 
-  console.log(totals);
-
   const values: { [key: string]: number | string }[] = [];
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
@@ -494,8 +480,6 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
         newRow[key] = val;
         continue;
       }
-
-      console.log(val, totals[row.name]);
 
       newRow[key] = ((val * 100) / totals[row.name]).toFixed(1);
     }

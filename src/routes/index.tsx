@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { ChartBarIcon, MapIcon } from "lucide-react";
 
 export const Route = createFileRoute("/")({
-  ssr: false,
   component: Home,
 });
 
