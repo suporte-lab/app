@@ -7,7 +7,6 @@ import { ResearchSetForm } from "@/components/research/research-set-form";
 import { ResearchDataTable } from "@/components/research/research-data-table";
 
 export const Route = createFileRoute("/__authed/dashboard/research/")({
-  ssr: false,
   component: RouteComponent,
 });
 

@@ -17,7 +17,6 @@ import { MunicipalityMapBanner } from "@/components/municipality/municipality-ma
 import { ProjectCategorySetForm } from "@/components/project/category-set-form";
 
 export const Route = createFileRoute("/__authed/dashboard/category/$id")({
-  ssr: false,
   component: RouteComponent,
 });
 

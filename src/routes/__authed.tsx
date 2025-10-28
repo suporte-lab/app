@@ -1,4 +1,5 @@
 import {
+  getSessionFn,
   getUserBySessionFn,
   validateSessionFn,
 } from "@/server/services/auth/functions";
@@ -6,8 +7,10 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/__authed")({
   beforeLoad: async ({ context }) => {
+    const session = await getSessionFn();
+
     try {
-      if (!context.session) {
+      if (!session) {
         throw new Error("Unauthorized");
       }
 
@@ -18,7 +21,7 @@ export const Route = createFileRoute("/__authed")({
       }
 
       await validateSessionFn({
-        data: { token: context.session.token },
+        data: { token: session.token },
       });
 
       return context;

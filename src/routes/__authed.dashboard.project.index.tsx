@@ -13,7 +13,6 @@ import { ProjectsImportDialog } from "@/components/project/projects-import-dialo
 import { DownloadIcon } from "lucide-react";
 
 export const Route = createFileRoute("/__authed/dashboard/project/")({
-  ssr: false,
   component: RouteComponent,
 });
 
@@ -52,9 +51,7 @@ function RouteComponent() {
               ))}
             </>
           ) : (
-            <div className="text-xs text-center flex-1">
-              Sem resultados
-            </div>
+            <div className="text-xs text-center flex-1">Sem resultados</div>
           )}
         </div>
       </Card>
@@ -65,7 +62,10 @@ function RouteComponent() {
             <>
               {categories?.map((category) => (
                 <Button key={category.id} variant="outline" asChild>
-                  <Link to="/dashboard/category/$id" params={{ id: category.id }}>
+                  <Link
+                    to="/dashboard/category/$id"
+                    params={{ id: category.id }}
+                  >
                     {category.name}
                   </Link>
                 </Button>

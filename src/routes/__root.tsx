@@ -10,17 +10,10 @@ import {
 
 import styles from "../styles/app.css?url";
 import { Toaster } from "sonner";
-import { getSessionFn } from "../server/services/auth/functions";
 
 export const Route = createRootRoute({
-  beforeLoad: async () => {
-    try {
-      const session = await getSessionFn();
-      return { session };
-    } catch {
-      return { session: null }
-    }
-  },
+  shellComponent: RootShell,
+  component: RootComponent,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -32,18 +25,12 @@ export const Route = createRootRoute({
       { rel: "icon", type: "image/png", href: "/favicon.png" },
     ],
   }),
-  component: RootComponent,
+  errorComponent: () => <div>Error</div>,
+  notFoundComponent: () => <div>Not found</div>,
+  ssr: false,
 });
 
-function RootComponent() {
-  return (
-    <RootDocument>
-      <Outlet />
-    </RootDocument>
-  );
-}
-
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>
@@ -57,3 +44,30 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     </html>
   );
 }
+
+function RootComponent() {
+  return <Outlet />;
+}
+
+// function RootComponent() {
+//   return (
+//     <RootDocument>
+//       <Outlet />
+//     </RootDocument>
+//   );
+// }
+
+// function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+//   return (
+//     <html>
+//       <head>
+//         <HeadContent />
+//       </head>
+//       <body>
+//         {children}
+//         <Toaster />
+//         <Scripts />
+//       </body>
+//     </html>
+//   );
+// }

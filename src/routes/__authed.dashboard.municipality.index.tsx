@@ -5,7 +5,6 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { MunicipalityDataTable } from "@/components/municipality/data-table";
 
 export const Route = createFileRoute("/__authed/dashboard/municipality/")({
-  ssr: false,
   component: RouteComponent,
 });
 

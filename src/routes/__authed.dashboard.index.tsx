@@ -13,7 +13,6 @@ import { MapSearch } from "@/components/map-search";
 import { MonitorSearch } from "@/components/monitor-search";
 
 export const Route = createFileRoute("/__authed/dashboard/")({
-  ssr: false,
   component: RouteComponent,
 });
 

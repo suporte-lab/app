@@ -17,7 +17,6 @@ import { MunicipalityMapBanner } from "@/components/municipality/municipality-ma
 import { ResearchCategoryCharts } from "@/components/research/research-category-charts";
 
 export const Route = createFileRoute("/__authed/dashboard/municipality/$id")({
-  ssr: false,
   component: RouteComponent,
 });
 

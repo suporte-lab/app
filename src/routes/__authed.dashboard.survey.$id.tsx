@@ -14,7 +14,6 @@ import { SurveyForm } from "@/components/research/survey-form";
 import { SurveySetForm } from "@/components/research/survey-set-form";
 
 export const Route = createFileRoute("/__authed/dashboard/survey/$id")({
-  ssr: false,
   component: RouteComponent,
 });
 
@@ -43,11 +42,7 @@ function RouteComponent() {
           <>
             <SurveySetForm
               survey={survey}
-              trigger={
-                <Button variant="outline">
-                  Editar
-                </Button>
-              }
+              trigger={<Button variant="outline">Editar</Button>}
               onSuccess={(id) => {
                 console.log("id", id);
               }}

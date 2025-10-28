@@ -20,13 +20,12 @@ import { softDeleteProjectFn } from "@/server/services/project/functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/__authed/dashboard/project/$id")({
-  ssr: false,
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const { id } = Route.useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const { data: project } = useQuery(getProjectOptions({ id }));
   const { data: municipalities } = useQuery(getMunicipalitiesOptions());
@@ -39,7 +38,6 @@ function RouteComponent() {
       navigate({ to: "/dashboard/project" });
     },
   });
-
 
   if (!project) {
     return (
@@ -145,7 +143,6 @@ function RouteComponent() {
           </div>
         </Card>
       </div>
-
       <ProjectMapBanner id={project.id} />
       <DashboardHeader title="Pesquisas" />
       <ResearchProjectCharts projectId={project.id} />

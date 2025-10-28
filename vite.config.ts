@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [
     tsConfigPaths(),
-    tanstackStart({ target: "bun", spa: { enabled: true } }),
+    tanstackStart({ target: "bun" }),
     tailwindcss(),
   ],
 });

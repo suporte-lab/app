@@ -8,7 +8,6 @@ import { Plus } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/__authed/dashboard/survey/")({
-  ssr: false,
   component: RouteComponent,
 });
 
