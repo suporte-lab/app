@@ -14,6 +14,6 @@ app.get("/test", (c) => {
 app.route("/api/expenses", expensesRoute);
 
 app.get("*", serveStatic({ root: "./frontend/dist" }));
-app.get("*", serveStatic({ path: "./frontend/dist/index.html" }));
+app.get("*", serveStatic({ path: "./frontend/dist" }));
 
 export default app;
