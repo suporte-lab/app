@@ -2,13 +2,12 @@ FROM oven/bun:1
 
 WORKDIR /app
 
-COPY bun.lock package.json ./
-RUN bun install --frozen-lockfile
-
 COPY . .
 
-ARG VITE_GOOGLE_MAPS_API_KEY
+RUN bun install --frozen-lockfile || bun install
 
-RUN bun run build
+RUN cd frontend && (bun install --frozen-lockfile || bun install) && bun run build
 
-CMD ["bun", "run", "./.output/server/index.mjs"]
+EXPOSE 3000
+
+CMD ["bun",  "start"]

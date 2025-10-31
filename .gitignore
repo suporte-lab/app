@@ -1,6 +1,9 @@
 # dependencies (bun install)
 node_modules
+<<<<<<< HEAD
 node_modules/
+=======
+>>>>>>> spa
 
 # output
 out
@@ -18,7 +21,14 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files
 .env
+<<<<<<< HEAD
 .env.*
+=======
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+>>>>>>> spa
 
 # caches
 .eslintcache
@@ -30,8 +40,11 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+<<<<<<< HEAD
 
 .nitro
 .output
 .tanstack
 .cursor
+=======
+>>>>>>> spa
