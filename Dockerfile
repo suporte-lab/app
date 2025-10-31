@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY . .
 
+ARG VITE_GOOGLE_MAPS_API_KEY
+
 RUN bun install --frozen-lockfile || bun install
 
 RUN cd frontend && (bun install --frozen-lockfile || bun install) && bun run build
