@@ -6,7 +6,7 @@ COPY . .
 
 RUN bun install --frozen-lockfile || bun install
 
-RUN cd frontend && bun install --frozen-lockfile || bun install && bun run build
+RUN cd frontend && (bun install --frozen-lockfile || bun install) && bun run build
 
 EXPOSE 3000
 

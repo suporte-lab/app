@@ -4,18 +4,35 @@
   "type": "module",
   "scripts": {
     "start": "bun server/index.ts",
-    "dev": "bun --watch server/index.ts"
+    "dev": "bun --watch server/index.ts",
+    "db:up": "bun server/db/migrate.ts",
+    "db:down": "bun server/db/rollback.ts",
+    "db:types": "kysely-codegen --camel-case --out-file='./server/db/types.ts'"
   },
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/chardet": "^1.0.0",
+    "@types/iconv": "^3.0.4",
+    "@types/papaparse": "^5.3.16",
+    "@types/pg": "^8.15.6",
+    "kysely-codegen": "^0.19.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.4",
+    "chardet": "^2.1.1",
+    "date-fns": "^4.1.0",
     "hono": "^4.10.3",
+    "iconv-lite": "^0.7.0",
+    "kysely": "^0.28.8",
+    "lucide-react": "^0.548.0",
+    "papaparse": "^5.5.3",
+    "pg": "^8.16.3",
+    "resend": "^6.3.0",
+    "ulid": "^3.0.1",
     "zod": "^4.1.12"
   }
 }
