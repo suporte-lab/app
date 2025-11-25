@@ -43,7 +43,11 @@ export const projectsRoute = new Hono()
 
       const data = await db
         .insertInto("project")
-        .values({ ...payload, id: ulid() })
+        .values({
+          ...payload,
+          responsibleEmail: payload.responsibleEmail ?? "",
+          id: ulid(),
+        })
         .returningAll()
         .executeTakeFirst();
 

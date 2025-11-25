@@ -49,7 +49,7 @@ export const setProjectSchema = z.object({
   responsibleName: z.string().min(1, "Campo obrigatório"),
   responsibleRole: z.string().min(1, "Campo obrigatório"),
   responsiblePhone: z.string(),
-  responsibleEmail: z.email(),
+  responsibleEmail: z.email().optional(),
   addressStreet: z.string().min(1, "Campo obrigatório"),
   addressNumber: z.string().optional(),
   addressZipCode: z.string().min(1, "Campo obrigatório"),
