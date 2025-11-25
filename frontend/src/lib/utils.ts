@@ -25,3 +25,14 @@ export function isBooleanLike(value: unknown) {
     value === 0
   );
 }
+export function getColumnLetter(index: number): string {
+  let result = "";
+
+  while (index >= 0) {
+    const remainder = index % 26;
+    result = String.fromCharCode(65 + remainder) + result;
+    index = Math.floor(index / 26) - 1;
+  }
+
+  return result;
+}

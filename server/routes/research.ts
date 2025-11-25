@@ -5,7 +5,7 @@ import { importSchema, setResearchSchema } from "../schemas";
 import { authMiddleware } from "./auth";
 import { ulid } from "ulid";
 import { mailShareLinkTemplate, resend, validateEmail } from "../services/mail";
-import { isBooleanLike } from "../../frontend/src/lib/utils";
+import { getColumnLetter, isBooleanLike } from "../../frontend/src/lib/utils";
 import Papa from "papaparse";
 
 export const researchsRoute = new Hono()
@@ -274,7 +274,7 @@ export const researchsRoute = new Hono()
           ) {
             log.push({
               type: "error",
-              message: `Linha ${i}, Coluna ${x} inválida. Precisa de ser um número.`,
+              message: `Linha ${i}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser um número.`,
             });
 
             invalidRows.push(project.id);
@@ -284,7 +284,7 @@ export const researchsRoute = new Hono()
           if (question.type == "boolean" && isBooleanLike(answer)) {
             log.push({
               type: "error",
-              message: `Linha ${i}, Coluna ${x} inválida. Precisa de ser um true/false.`,
+              message: `Linha ${i}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser um true/false.`,
             });
 
             invalidRows.push(project.id);
@@ -304,7 +304,7 @@ export const researchsRoute = new Hono()
             if (!isValid) {
               log.push({
                 type: "error",
-                message: `Linha ${i}, Coluna ${x} inválida. Precisa de ser uma das seguintes respostas ("${options.join(
+                message: `Linha ${i}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser uma das seguintes respostas ("${options.join(
                   ", "
                 )}").`,
               });
