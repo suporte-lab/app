@@ -38,8 +38,6 @@ export const categoriesRoute = new Hono()
         .where("name", "=", payload.name)
         .executeTakeFirst();
 
-      console.log(existing, payload);
-
       if (existing) {
         const data = await db
           .updateTable("projectCategory")

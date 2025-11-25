@@ -62,6 +62,8 @@ export function ProjectForm({
     addressZipCode: project?.addressZipCode ?? "",
     latitude: project?.latitude ?? 0,
     longitude: project?.longitude ?? 0,
+    numberOfEmployees: project?.numberOfEmployees ?? 0,
+    childrenInCare: project?.childrenInCare ?? 0,
   };
 
   const form = useForm({
@@ -245,6 +247,52 @@ export function ProjectForm({
                       type="email"
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
+                    />
+
+                    <FieldError error={field.state.meta.errors?.join(", ")} />
+                  </div>
+                )}
+              />
+
+              <div className="text-xs tracking-wider uppercase font-medium bg-muted/50 p-3 border-b my-3 flex items-center gap-2">
+                <User className="size-4" /> Detalhes
+              </div>
+
+              <form.Field
+                name="numberOfEmployees"
+                children={(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>
+                      Quantas crianças de até 6 anos a unidade atende
+                    </Label>
+
+                    <Input
+                      type="number"
+                      value={field.state.value}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
+                    />
+
+                    <FieldError error={field.state.meta.errors?.join(", ")} />
+                  </div>
+                )}
+              />
+
+              <form.Field
+                name="numberOfEmployees"
+                children={(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>
+                      Quantas pessoas trabalham na unidade
+                    </Label>
+
+                    <Input
+                      type="number"
+                      value={field.state.value}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
                     />
 
                     <FieldError error={field.state.meta.errors?.join(", ")} />

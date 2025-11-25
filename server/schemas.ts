@@ -55,6 +55,9 @@ export const setProjectSchema = z.object({
   addressZipCode: z.string().min(1, "Campo obrigatório"),
   latitude: z.coerce.number(),
   longitude: z.coerce.number(),
+  // Details
+  numberOfEmployees: z.coerce.number(),
+  childrenInCare: z.coerce.number(),
 });
 
 export const putProjectSchema = setProjectSchema.omit({});

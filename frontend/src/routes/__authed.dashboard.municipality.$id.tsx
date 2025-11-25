@@ -103,9 +103,8 @@ function RouteComponent() {
       <DashboardHeader title="Projetos" />
       <MunicipalityMapBanner id={id} />
       <ProjectTable municipalityId={id} />
-      <DashboardHeader title="Pesquisas" />
-      CHART TO DO
-      {/* <ResearchCategoryCharts municipalityId={id} /> */}
+      {/* <DashboardHeader title="Pesquisas" />
+      <ResearchCategoryCharts municipalityId={id} /> */}
     </DashboardLayout>
   );
 }

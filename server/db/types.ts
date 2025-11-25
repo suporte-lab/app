@@ -27,6 +27,7 @@ export interface Project {
   addressStreet: string;
   addressZipCode: string | null;
   categoryId: string;
+  childrenInCare: Generated<number>;
   createdAt: Generated<Timestamp>;
   id: string;
   isDeleted: Generated<boolean>;
@@ -34,6 +35,7 @@ export interface Project {
   longitude: number;
   municipalityId: string;
   name: string;
+  numberOfEmployees: Generated<number>;
   responsibleEmail: string;
   responsibleName: string | null;
   responsiblePhone: string | null;
