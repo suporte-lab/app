@@ -3,6 +3,7 @@ import { Kysely, sql } from "kysely";
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable("project_category")
+    .ifNotExists()
     .addColumn("id", "text", (col) => col.primaryKey())
     .addColumn("name", "text", (col) => col.notNull().unique())
     .addColumn("is_deleted", "boolean", (col) => col.notNull().defaultTo(false))
@@ -16,6 +17,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
   await db.schema
     .createTable("project")
+    .ifNotExists()
     .addColumn("id", "text", (col) => col.primaryKey())
     .addColumn("category_id", "text", (col) =>
       col.notNull().references("project_category.id")

@@ -259,7 +259,7 @@ export function ProjectForm({
               </div>
 
               <form.Field
-                name="numberOfEmployees"
+                name="childrenInCare"
                 children={(field) => (
                   <div className="space-y-2">
                     <Label htmlFor={field.name}>
