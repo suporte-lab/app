@@ -237,6 +237,7 @@ export const researchsRoute = new Hono()
         .executeTakeFirstOrThrow();
 
       for (let i = 0; i < csv.data.length; i++) {
+        const rowNumber = i + 2;
         const row = csv.data[i];
 
         if (row instanceof Object !== true) continue;
@@ -274,7 +275,7 @@ export const researchsRoute = new Hono()
           ) {
             log.push({
               type: "error",
-              message: `Linha ${i}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser um número.`,
+              message: `Linha ${rowNumber}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser um número.`,
             });
 
             invalidRows.push(project.id);
@@ -284,7 +285,7 @@ export const researchsRoute = new Hono()
           if (question.type == "boolean" && isBooleanLike(answer)) {
             log.push({
               type: "error",
-              message: `Linha ${i}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser um true/false.`,
+              message: `Linha ${rowNumber}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser um true/false.`,
             });
 
             invalidRows.push(project.id);
@@ -304,7 +305,7 @@ export const researchsRoute = new Hono()
             if (!isValid) {
               log.push({
                 type: "error",
-                message: `Linha ${i}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser uma das seguintes respostas ("${options.join(
+                message: `Linha ${rowNumber}, Coluna ${getColumnLetter(x)} inválida. Precisa de ser uma das seguintes respostas ("${options.join(
                   ", "
                 )}").`,
               });
