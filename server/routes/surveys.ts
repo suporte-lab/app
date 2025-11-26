@@ -285,18 +285,13 @@ export const surveysRoute = new Hono()
     }
   )
   .delete("/:id", authMiddleware, async (c) => {
-    await db
-      .updateTable("survey")
-      .set({ isDeleted: true })
-      .where("id", "=", c.req.param("id"))
-      .execute();
+    await db.deleteFrom("survey").where("id", "=", c.req.param("id")).execute();
 
     return c.json({ deleted: c.req.param("id") });
   })
   .delete("/:id/questions", authMiddleware, async (c) => {
     await db
-      .updateTable("surveyQuestion")
-      .set({ isDeleted: true })
+      .deleteFrom("surveyQuestion")
       .where("id", "=", c.req.param("id"))
       .execute();
 

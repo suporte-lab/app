@@ -384,8 +384,7 @@ export const researchsRoute = new Hono()
   )
   .delete("/:id", authMiddleware, async (c) => {
     await db
-      .updateTable("research")
-      .set({ isDeleted: true })
+      .deleteFrom("research")
       .where("id", "=", c.req.param("id"))
       .execute();
 

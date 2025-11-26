@@ -73,8 +73,7 @@ export const projectsRoute = new Hono()
   )
   .delete("/:id", authMiddleware, async (c) => {
     await db
-      .updateTable("project")
-      .set({ isDeleted: true })
+      .deleteFrom("project")
       .where("id", "=", c.req.param("id"))
       .execute();
 

@@ -76,9 +76,8 @@ function RouteComponent() {
                 navigate({ to: "/dashboard/project" });
               }}
             >
-              <Button variant="outline">
+              <Button variant="outline" size="icon">
                 <Trash2Icon />
-                Apagar
               </Button>
             </ConfirmDialog>
           </>

@@ -1,14 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Plus, Trash2Icon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchSurveyOptions, fetchSurveyQuestionsOptions } from "@/lib/api";
+import {
+  api,
+  fetchSurveyOptions,
+  fetchSurveyQuestionsOptions,
+} from "@/lib/api";
 import { SurveyForm } from "@/components/survey-form";
 import { SurveyFillable } from "@/components/survey-fillable";
 import { SurveyQuestionForm } from "@/components/survey-question-form";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/__authed/dashboard/survey/$id")({
   component: RouteComponent,
@@ -17,6 +23,8 @@ export const Route = createFileRoute("/__authed/dashboard/survey/$id")({
 function RouteComponent() {
   const ctx = Route.useRouteContext();
   const { id } = Route.useParams();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data: survey } = useQuery(fetchSurveyOptions(id));
   const { data: questions } = useQuery(fetchSurveyQuestionsOptions(id));
@@ -51,6 +59,26 @@ function RouteComponent() {
                 </Button>
               }
             />
+            <ConfirmDialog
+              title="Deletar formulário"
+              onConfirm={async () => {
+                const res = await api.surveys[":id"].$delete({
+                  param: { id },
+                });
+
+                if (!res.ok) {
+                  return toast.error("Error servidor");
+                }
+
+                toast.success("Apagado com sucesso.");
+                queryClient.invalidateQueries({ queryKey: ["surveys"] });
+                router.navigate({ to: "/dashboard/survey" });
+              }}
+            >
+              <Button variant="outline" size="icon">
+                <Trash2Icon />
+              </Button>
+            </ConfirmDialog>
           </>
         }
       />

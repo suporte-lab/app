@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { DownloadIcon, LinkIcon, Mail } from "lucide-react";
+import { DownloadIcon, LinkIcon, Mail, Trash2 } from "lucide-react";
 import { api, fetchProjectsOptions, fetchResearchOptions } from "@/lib/api";
 import { ResearchResultsTable } from "@/components/research-results-table";
 import { ResearchImportDialog } from "@/components/research-import-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/__authed/dashboard/research/$id/")({
   component: RouteComponent,
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/__authed/dashboard/research/$id/")({
 function RouteComponent() {
   const ctx = Route.useRouteContext();
   const { id } = Route.useParams();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data } = useQuery(fetchResearchOptions(id));
   const { data: projects } = useQuery(fetchProjectsOptions());
@@ -127,6 +130,26 @@ function RouteComponent() {
               <DownloadIcon />
               Exportar
             </Button>
+            <ConfirmDialog
+              title="Deletar pesquisa"
+              onConfirm={async () => {
+                const res = await api.researchs[":id"].$delete({
+                  param: { id },
+                });
+
+                if (!res.ok) {
+                  return toast.error("Error servidor");
+                }
+
+                toast.success("Apagado com sucesso.");
+                queryClient.invalidateQueries({ queryKey: ["researchs"] });
+                router.navigate({ to: "/dashboard/research" });
+              }}
+            >
+              <Button variant="outline" size="icon">
+                <Trash2 className="size-4" />
+              </Button>
+            </ConfirmDialog>
           </div>
         }
       />

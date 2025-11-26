@@ -57,8 +57,17 @@ function RouteComponent() {
         title={project.name}
         right={
           <>
+            <ProjectForm
+              id={project.id}
+              trigger={
+                <Button>
+                  <EditIcon />
+                  Editar
+                </Button>
+              }
+            />
             <ConfirmDialog
-              title="Deletar município"
+              title="Deletar projeto"
               onConfirm={async () => {
                 const res = await api.projects[":id"].$delete({
                   param: { id },
@@ -73,20 +82,10 @@ function RouteComponent() {
                 navigate({ to: "/dashboard/project" });
               }}
             >
-              <Button variant="outline">
+              <Button variant="outline" size="icon">
                 <Trash2Icon />
-                Apagar
               </Button>
             </ConfirmDialog>
-            <ProjectForm
-              id={project.id}
-              trigger={
-                <Button>
-                  <EditIcon />
-                  Editar
-                </Button>
-              }
-            />
           </>
         }
       />
