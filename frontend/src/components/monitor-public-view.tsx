@@ -355,44 +355,41 @@ export function MonitorPublicView() {
 }
 
 const colors = [
-  "var(--color-amber-200)",
-  "var(--color-blue-100)",
-  "var(--color-green-100)",
-  "var(--color-red-100)",
-  "var(--color-purple-100)",
-  "var(--color-orange-100)",
-  "var(--color-pink-100)",
-  "var(--color-brown-100)",
-  "var(--color-gray-100)",
-  "var(--color-black-100)",
-  "var(--color-white-100)",
-  "var(--color-yellow-100)",
-  "var(--color-lime-100)",
-  "var(--color-teal-100)",
-  "var(--color-cyan-100)",
-  "var(--color-indigo-100)",
-  "var(--color-violet-100)",
-  "var(--color-rose-100)",
-  "var(--color-sky-100)",
-  "var(--color-amber-100)",
-  "var(--color-blue-100)",
-  "var(--color-green-100)",
-  "var(--color-red-100)",
-  "var(--color-purple-100)",
-  "var(--color-orange-100)",
-  "var(--color-pink-100)",
-  "var(--color-brown-100)",
-  "var(--color-gray-100)",
-  "var(--color-black-100)",
-  "var(--color-white-100)",
-  "var(--color-yellow-100)",
-  "var(--color-lime-100)",
-  "var(--color-teal-100)",
-  "var(--color-cyan-100)",
-  "var(--color-indigo-100)",
-  "var(--color-violet-100)",
-  "var(--color-rose-100)",
-  "var(--color-sky-100)",
+  "#fef3c7", // amber-200
+  "#dbeafe", // blue-100
+  "#dcfce7", // green-100
+  "#fee2e2", // red-100
+  "#f3e8ff", // purple-100
+  "#ffedd5", // orange-100
+  "#fce7f3", // pink-100
+  "#d6d3d1", // brown-100 (stone-100)
+  "#f3f4f6", // gray-100
+  "#f5f5f4", // replaced black-100 → neutral-100
+  "#f1f5f9", // replaced white-100 → slate-100
+  "#fef9c3", // yellow-100
+  "#ecfccb", // lime-100
+  "#ccfbf1", // teal-100
+  "#cffafe", // cyan-100
+  "#e0e7ff", // indigo-100
+  "#ede9fe", // violet-100
+  "#ffe4e6", // rose-100
+  "#e0f2fe", // sky-100
+  "#fde68a", // amber-100
+  "#dbeafe", // blue-100
+  "#dcfce7", // green-100
+  "#fee2e2", // red-100
+  "#f3e8ff", // purple-100
+  "#ffedd5", // orange-100
+  "#fce7f3", // pink-100
+  "#d6d3d1", // brown-100 (stone-100)
+  "#f3f4f6", // gray-100
+  "#f5f5f4", // neutra l-100
+  "#f1f5f9", // slate-100
+  "#fef9c3", // yellow-100
+  "#ecfccb", // lime-100
+  "#ccfbf1", // teal-100
+  "#cffafe", // cyan-100
+  "#e0e7ff", // in
 ];
 
 function Chart({ data }: { data: { [key: string]: number | string }[] }) {
@@ -446,7 +443,23 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
 
   return (
     <div>
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-center justify-between mb-5">
+      <div className="flex flex-col gap-5 mb-5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {columns.map((key, i) => {
+            return (
+              <div
+                key={key + i}
+                className="flex items-center gap-3 border border-dashed border-blue-100 py-1.5 px-3 rounded-md"
+              >
+                <div
+                  className="size-4 shrink-0 rounded-[2px]"
+                  style={{ backgroundColor: colors[i] }}
+                />
+                <span className="text-xs font-medium">{key}</span>
+              </div>
+            );
+          })}
+        </div>
         <div className="flex items-center gap-2.5">
           <Button
             size="sm"
@@ -462,22 +475,6 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
           >
             Percentagem
           </Button>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5 xl:justify-end">
-          {columns.map((key, i) => {
-            return (
-              <div
-                key={key + i}
-                className="flex items-center gap-3 border border-dashed border-blue-100 py-1.5 px-3 rounded-md"
-              >
-                <div
-                  className="size-4 shrink-0 rounded-[2px]"
-                  style={{ backgroundColor: colors[i] }}
-                />
-                <span className="text-xs font-medium">{key}</span>
-              </div>
-            );
-          })}
         </div>
       </div>
 
