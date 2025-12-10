@@ -463,7 +463,7 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
             Percentagem
           </Button>
         </div>
-        <div className="flex items-center gap-2.5 xl:justify-end">
+        <div className="flex flex-wrap items-center gap-2.5 xl:justify-end">
           {columns.map((key, i) => {
             return (
               <div
@@ -474,7 +474,7 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
                   className="size-4 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: colors[i] }}
                 />
-                <span className="text-sm font-medium">{key}</span>
+                <span className="text-xs font-medium">{key}</span>
               </div>
             );
           })}
