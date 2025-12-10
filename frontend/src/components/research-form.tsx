@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { slugify } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldError } from "@/components/field-error";
@@ -22,17 +22,25 @@ import {
   zodToFieldErrors,
   type SetResearchParams,
 } from "@server/schemas";
-import { api } from "@/lib/api";
+import { api, fetchResearchOptions } from "@/lib/api";
 
-export function ResearchForm({ trigger }: { trigger?: React.ReactNode }) {
+export function ResearchForm({
+  id,
+  trigger,
+}: {
+  id?: string;
+  trigger?: React.ReactNode;
+}) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
+  const { data } = useQuery(fetchResearchOptions(id ?? ""));
+
   const defaultValues: SetResearchParams = {
-    name: "",
-    slug: "",
-    surveyId: "",
-    municipalityId: "",
+    name: data?.research?.name ?? "",
+    slug: data?.research?.slug ?? "",
+    surveyId: data?.research?.surveyId ?? "",
+    municipalityId: data?.research?.municipalityId ?? "",
   };
 
   const form = useForm({
@@ -44,7 +52,18 @@ export function ResearchForm({ trigger }: { trigger?: React.ReactNode }) {
       },
     },
     onSubmit: async ({ value }) => {
-      const res = await api.researchs.$post({ json: value });
+      let res;
+
+      console;
+
+      if (id) {
+        res = await api.researchs[":id"].$put({
+          json: value,
+          param: { id },
+        });
+      } else {
+        res = await api.researchs.$post({ json: value });
+      }
 
       if (!res.ok) {
         toast.error("Erro servidor");
@@ -53,6 +72,7 @@ export function ResearchForm({ trigger }: { trigger?: React.ReactNode }) {
 
       queryClient.invalidateQueries({ queryKey: ["researchs"] });
       toast.success("Operaçāo concluida com sucesso");
+      setOpen(false);
     },
   });
 
@@ -72,7 +92,7 @@ export function ResearchForm({ trigger }: { trigger?: React.ReactNode }) {
         <DialogHeader>
           <DialogTitle>Pesquisa</DialogTitle>
           <DialogDescription>
-            Crie uma nova pesquisa para todos os seus projetos.
+            Crie uma nova pesquisa para todos as suas unidades.
           </DialogDescription>
         </DialogHeader>
 

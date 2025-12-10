@@ -38,7 +38,7 @@ function RouteComponent() {
           </div>
           <div className="space-y-0.5 flex-1">
             <div className="text-xs font-medium text-muted-foreground">
-              Projeto
+              Unidade
             </div>
             <div className="font-medium">{project?.name}</div>
           </div>
@@ -49,7 +49,7 @@ function RouteComponent() {
           </Link>
         </div>
         <h3 className="text-sm font-medium text-center p-3 border rounded-lg">
-          Pesquisas do Projeto
+          Pesquisas da unidade
         </h3>
       </div>
 

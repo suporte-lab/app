@@ -73,7 +73,7 @@ function RouteComponent() {
                 <Building2 className="size-full" />
               </div>
               <div>
-                <h2 className="text-sm">Projetos</h2>
+                <h2 className="text-sm">Unidades</h2>
                 <p className="text-2xl font-bold">{list?.length ?? 0}</p>
               </div>
             </div>
@@ -100,7 +100,7 @@ function RouteComponent() {
           </div>
         </Card>
       </div>
-      <DashboardHeader title="Projetos" />
+      <DashboardHeader title="Unidades" />
       <MunicipalityMapBanner id={id} />
       <ProjectTable municipalityId={id} />
       {/* <DashboardHeader title="Pesquisas" />

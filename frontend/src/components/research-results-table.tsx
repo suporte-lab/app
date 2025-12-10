@@ -127,7 +127,7 @@ export function ResearchResultsTable({
         <DialogContent className="p-0 border-none rounded-xl">
           <DialogTitle className="sr-only">Resultado da pesquisa</DialogTitle>
           <DialogDescription className="sr-only">
-            Visualize o resultado da pesquisa para o projeto
+            Visualize o resultado da pesquisa para a unidade
           </DialogDescription>
           <SurveyFillableResult
             projectId={projectId ?? ""}

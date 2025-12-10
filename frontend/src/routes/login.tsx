@@ -46,6 +46,7 @@ function RouteComponent() {
     },
     onSubmit: async ({ value }) => {
       const res = await api.auth.login.$post({ json: value });
+
       const { message } = await res.json();
 
       if (!res.ok) {

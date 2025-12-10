@@ -10,13 +10,16 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProjectsOptions } from "@/lib/api";
+import { fetchProjectsOptions, fetchResearchOptions } from "@/lib/api";
 
 export const Route = createFileRoute("/research/$id/pick")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { id } = Route.useParams();
+
+  const { data } = useQuery(fetchResearchOptions(id));
   const { data: projects } = useQuery(fetchProjectsOptions());
 
   const [selected, setSelected] = useState(projects?.[0].id);
@@ -25,9 +28,9 @@ function RouteComponent() {
     <RequestResearchLayout>
       <div className="flex flex-col space-y-4 rounded-lg p-6 border bg-white">
         <div className="space-y-1 text-center">
-          <h1 className="font-medium text-lg">Escolha o seu projeto</h1>
+          <h1 className="font-medium text-lg">Escolha a sua unidade</h1>
           <p className="text-xs text-muted-foreground text-balance">
-            Use o selecionador abaixo para entrar nas pesquisas do seu projeto.
+            Use o selecionador abaixo para entrar nas pesquisas da sua unidade.
           </p>
         </div>
 
@@ -38,17 +41,22 @@ function RouteComponent() {
             <SelectValue placeholder="Formulário" />
           </SelectTrigger>
           <SelectContent>
-            {projects?.map(({ id, name }) => (
-              <SelectItem key={id} value={id}>
-                {name}
-              </SelectItem>
-            ))}
+            {projects
+              ?.filter(
+                (p) => p.municipalityId === data?.research.municipalityId
+              )
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(({ id, name }) => (
+                <SelectItem key={id} value={id}>
+                  {name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
         {selected && (
           <Button asChild>
             <Link to="/project/$id/survey" params={{ id: selected }}>
-              Acessar projeto
+              Acessar unidade
             </Link>
           </Button>
         )}

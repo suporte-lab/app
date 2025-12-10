@@ -89,7 +89,7 @@ export function SurveyFillable({
     }
 
     if (!projectId || !researchId) {
-      toast.error("Projeto ou pesquisa é obrigatório");
+      toast.error("Unidade ou pesquisa é obrigatório");
       return;
     }
 

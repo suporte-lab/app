@@ -20,7 +20,7 @@ export function ProjectCategorySelect({
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Categoria de projeto" />
+        <SelectValue placeholder="Categoria de unidade" />
       </SelectTrigger>
       <SelectContent>
         {data?.map(({ id, name }) => (

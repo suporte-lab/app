@@ -19,39 +19,43 @@ export const researchsRoute = new Hono()
     return c.json({ data });
   })
   .get("/results", async (c) => {
+    const questions: Record<string, string> = {};
+    const researchs: Record<
+      string,
+      Awaited<ReturnType<typeof getResearchResults>>
+    > = {};
+
     const rows = await db
       .selectFrom("research")
       .selectAll()
       .orderBy("createdAt", "desc")
       .execute();
 
+    console.log(rows);
+
     if (!rows) {
-      throw new Error("Researchs not found");
+      return c.json({ data: { researchs, questions } });
     }
 
-    const questionsData = await db
+    let query = db
       .selectFrom("surveyQuestion")
       .selectAll()
-      .where(
+      .where("isDeleted", "=", false)
+      .orderBy("position");
+
+    if (rows.length > 0) {
+      query = query.where(
         "surveyId",
         "in",
         rows.map((r) => r.surveyId)
-      )
-      .where("isDeleted", "=", false)
-      .orderBy("position")
+      );
+    }
 
-      .execute();
-
-    const questions: Record<string, string> = {};
+    const questionsData = await query.execute();
 
     for (const question of questionsData) {
       questions[question.id] = question.question;
     }
-
-    const researchs: Record<
-      string,
-      Awaited<ReturnType<typeof getResearchResults>>
-    > = {};
 
     for (const row of rows) {
       researchs[row.id] = await getResearchResults(row.id);
@@ -380,6 +384,23 @@ export const researchsRoute = new Hono()
       }
 
       return c.json({ newRows, log });
+    }
+  )
+  .put(
+    "/:id",
+    authMiddleware,
+    zValidator("json", setResearchSchema),
+    async (c) => {
+      const payload = c.req.valid("json");
+
+      const data = await db
+        .updateTable("research")
+        .set({ ...payload })
+        .where("id", "=", c.req.param("id"))
+        .returningAll()
+        .executeTakeFirst();
+
+      return c.json({ data });
     }
   )
   .delete("/:id", authMiddleware, async (c) => {

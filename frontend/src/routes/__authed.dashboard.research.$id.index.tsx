@@ -12,11 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { DownloadIcon, LinkIcon, Mail, Trash2 } from "lucide-react";
+import { DownloadIcon, Edit, LinkIcon, Mail, Trash2 } from "lucide-react";
 import { api, fetchProjectsOptions, fetchResearchOptions } from "@/lib/api";
 import { ResearchResultsTable } from "@/components/research-results-table";
 import { ResearchImportDialog } from "@/components/research-import-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ResearchForm } from "@/components/research-form";
 
 export const Route = createFileRoute("/__authed/dashboard/research/$id/")({
   component: RouteComponent,
@@ -130,6 +131,14 @@ function RouteComponent() {
               <DownloadIcon />
               Exportar
             </Button>
+            <ResearchForm
+              id={data.research.id}
+              trigger={
+                <Button variant="outline" size="icon">
+                  <Edit className="size-4" />
+                </Button>
+              }
+            />
             <ConfirmDialog
               title="Deletar pesquisa"
               onConfirm={async () => {
@@ -157,7 +166,7 @@ function RouteComponent() {
       <Card>
         <CardHeader>
           <CardTitle>Completo</CardTitle>
-          <CardDescription>Projetos que foram completados</CardDescription>
+          <CardDescription>Unidades que foram completados</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -167,7 +176,7 @@ function RouteComponent() {
       <Card>
         <CardHeader>
           <CardTitle>Faltando</CardTitle>
-          <CardDescription>Projetos que faltam na pesquisa</CardDescription>
+          <CardDescription>Unidades que faltam na pesquisa</CardDescription>
         </CardHeader>
 
         <CardContent>

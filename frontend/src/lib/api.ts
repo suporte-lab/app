@@ -152,6 +152,7 @@ export const fetchProjectResearchsOptions = (id: string) => ({
     if (!res.ok) throw new Error("server error");
     return (await res.json()).data;
   },
+  enabled: !!id,
 });
 
 export const fetchResearchOptions = (id: string) => ({

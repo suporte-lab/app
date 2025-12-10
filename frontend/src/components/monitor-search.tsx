@@ -162,6 +162,7 @@ export function MonitorSearch() {
               setSelectedMunicipality(value);
 
               setFilterProjects([]);
+              setFilterCategories([]);
             }}
           >
             <SelectTrigger className="w-full">
@@ -181,7 +182,7 @@ export function MonitorSearch() {
           <div className="gap-1 flex items-center justify-between">
             <h3 className="text-sm font-medium flex items-center gap-1.5">
               <Building className="size-3.5" />
-              Projetos
+              Unidades
             </h3>
             {filterProjects.length > 0 && (
               <Button
@@ -197,12 +198,27 @@ export function MonitorSearch() {
             )}
           </div>
           <MultiSelect
-            placeholder="Selecione os projetos"
-            selectedLabel={"projeto" + (filterProjects.length > 1 ? "s" : "")}
-            options={projects.map((project) => ({
-              label: project.name,
-              value: project.id,
-            }))}
+            placeholder="Selecione as unidades"
+            selectedLabel={"unidade" + (filterProjects.length > 1 ? "s" : "")}
+            options={projects
+              .filter((p) => {
+                if (selectedMunicipality === "all") {
+                  return true;
+                }
+
+                return selectedMunicipality === p.municipalityId;
+              })
+              .filter((p) => {
+                if (!filterCategories.length) {
+                  return true;
+                }
+
+                return filterCategories.includes(p.categoryId);
+              })
+              .map((project) => ({
+                label: project.name,
+                value: project.id,
+              }))}
             value={filterProjects}
             onChange={(value) => setFilterProjects(value)}
             size="w-72"
@@ -222,6 +238,7 @@ export function MonitorSearch() {
                 className="text-sm p-0 gap-1 items-center"
                 onClick={() => {
                   setFilterCategories([]);
+                  setFilterProjects([]);
                 }}
               >
                 Limpar
@@ -350,7 +367,7 @@ export function MonitorSearch() {
           {filterProjects.length > 0 && (
             <div className="border border-dashed rounded-lg p-4 flex gap-4">
               <h3 className="font-medium py-3 min-w-20 text-slate-600">
-                Projetos{" "}
+                Unidades{" "}
               </h3>
               <div className="flex items-center gap-2.5 border-l py-3 px-4">
                 {filterProjects.map((project) => (
@@ -399,8 +416,6 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
       totals[row.name] = (totals[row.name] || 0) + row[key];
     }
   }
-
-  console.log(totals);
 
   const values: { [key: string]: number | string }[] = [];
   for (let i = 0; i < data.length; i++) {

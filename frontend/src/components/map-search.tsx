@@ -338,7 +338,7 @@ function MapFilterQuestions({
           <DialogHeader>
             <DialogTitle>Filtros</DialogTitle>
             <DialogDescription>
-              Filtre os projetos por dados de pesquisa.
+              Filtre as unidades por dados de pesquisa.
             </DialogDescription>
           </DialogHeader>
           <div className="border rounded-lg p-6 border-dashed space-y-6">

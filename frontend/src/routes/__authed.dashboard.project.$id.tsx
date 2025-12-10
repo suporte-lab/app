@@ -67,7 +67,7 @@ function RouteComponent() {
               }
             />
             <ConfirmDialog
-              title="Deletar projeto"
+              title="Deletar unidade"
               onConfirm={async () => {
                 const res = await api.projects[":id"].$delete({
                   param: { id },

@@ -217,11 +217,11 @@ export function ProjectActions({ id }: { id: string }) {
           }
 
           queryClient.invalidateQueries({ queryKey: ["projects"] });
-          toast.success("Projeto deletado");
+          toast.success("Unidade deletado");
 
           setTimeout(() => (document.body.style.pointerEvents = ""), 500);
         }}
-        title="Deletar projeto"
+        title="Deletar unidade"
         description={`Tem certeza que deseja deletar?`}
       />
     </>

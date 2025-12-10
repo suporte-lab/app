@@ -142,7 +142,7 @@ export function MonitorPublicView() {
             value={selectedMunicipality}
             onValueChange={(value) => {
               setSelectedMunicipality(value);
-
+              setFilterCategories([]);
               setFilterProjects([]);
             }}
           >
@@ -173,6 +173,7 @@ export function MonitorPublicView() {
                 className="text-sm p-0 gap-1 items-center"
                 onClick={() => {
                   setFilterCategories([]);
+                  setFilterProjects([]);
                 }}
               >
                 Limpar
@@ -187,7 +188,10 @@ export function MonitorPublicView() {
               value: category.id,
             }))}
             value={filterCategories}
-            onChange={(value) => setFilterCategories(value)}
+            onChange={(value) => {
+              setFilterCategories(value);
+              setFilterProjects([]);
+            }}
             size="w-72"
           />
         </div>
@@ -216,10 +220,25 @@ export function MonitorPublicView() {
             selectedLabel={
               "equipamento" + (filterProjects.length > 1 ? "s" : "")
             }
-            options={projects.map((project) => ({
-              label: project.name,
-              value: project.id,
-            }))}
+            options={projects
+              .filter((p) => {
+                if (selectedMunicipality === "all") {
+                  return true;
+                }
+
+                return selectedMunicipality === p.municipalityId;
+              })
+              .filter((p) => {
+                if (!filterCategories.length) {
+                  return true;
+                }
+
+                return filterCategories.includes(p.categoryId);
+              })
+              .map((project) => ({
+                label: project.name,
+                value: project.id,
+              }))}
             value={filterProjects}
             onChange={(value) => setFilterProjects(value)}
             size="w-72"

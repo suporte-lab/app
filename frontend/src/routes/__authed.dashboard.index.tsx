@@ -41,7 +41,7 @@ function RouteComponent() {
           <Link to="/dashboard/project">
             <DashboardCountCard
               count={projects?.length ?? 0}
-              title="Projetos"
+              title="Unidades"
             />
           </Link>
         ) : (
@@ -60,7 +60,7 @@ function RouteComponent() {
         )}
       </div>
 
-      <DashboardHeader title="Projetos" />
+      <DashboardHeader title="Unidades" />
       <MapSearch />
       <DashboardHeader title="Análise de dados" />
       <MonitorSearch />
