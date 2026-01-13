@@ -18,6 +18,8 @@ import { ResearchResultsTable } from "@/components/research-results-table";
 import { ResearchImportDialog } from "@/components/research-import-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ResearchForm } from "@/components/research-form";
+import { csvEscape } from "@/lib/utils";
+import { formatDate } from "date-fns";
 
 export const Route = createFileRoute("/__authed/dashboard/research/$id/")({
   component: RouteComponent,
@@ -45,10 +47,18 @@ function RouteComponent() {
         Nome: project.name,
       };
 
+      console.log(results);
       for (const questionId of Object.keys(results)) {
+        if (questionId === "createdAt") continue;
+
         const question = data.questions[questionId];
         row[question] = results[questionId]?.join(", ") ?? "";
       }
+
+      row["Data de envio"] = formatDate(
+        results.createdAt.join(""),
+        "dd-MM-yyyy"
+      );
 
       output.push(row);
     }
@@ -58,17 +68,24 @@ function RouteComponent() {
 
   function downloadCSV() {
     const data = generateData();
+    if (!data.length) return;
 
-    const headers = Object.keys(generateData()[0]).join(",") + "\n";
-    const rows = data.map((obj) => Object.values(obj).join(",")).join("\n");
+    const headers = Object.keys(data[0]).map(csvEscape).join(",") + "\n";
+
+    const rows = data
+      .map((obj) => Object.values(obj).map(csvEscape).join(","))
+      .join("\n");
+
     const csv = headers + rows;
 
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
     a.download = "data.csv";
     a.click();
+
     window.URL.revokeObjectURL(url);
   }
 
@@ -84,7 +101,7 @@ function RouteComponent() {
   return (
     <DashboardLayout auth={ctx.auth} title={"Pesquisa"}>
       <DashboardHeader
-        title={data.research.name}
+        title={`${formatDate(data.research.createdAt, "dd-MM-yyyy")} | ${data.research.name}`}
         right={
           <div className="flex gap-2">
             <Button

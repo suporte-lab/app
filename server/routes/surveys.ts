@@ -166,7 +166,10 @@ export const surveysRoute = new Hono()
         return c.json({ message: "Failed to create question" }, 500);
       }
 
-      if (payload.type === "select" && payload.options?.length) {
+      if (
+        ["select", "select-multi"].includes(payload.type) &&
+        payload.options?.length
+      ) {
         const existingOptions = await db
           .selectFrom("surveyQuestionMetadata")
           .selectAll()

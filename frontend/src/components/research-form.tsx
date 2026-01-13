@@ -23,6 +23,7 @@ import {
   type SetResearchParams,
 } from "@server/schemas";
 import { api, fetchResearchOptions } from "@/lib/api";
+import { DatePicker } from "./date-picker";
 
 export function ResearchForm({
   id,
@@ -37,6 +38,9 @@ export function ResearchForm({
   const { data } = useQuery(fetchResearchOptions(id ?? ""));
 
   const defaultValues: SetResearchParams = {
+    createdAt: data?.research?.createdAt
+      ? new Date(data.research.createdAt).toISOString()
+      : new Date().toISOString(),
     name: data?.research?.name ?? "",
     slug: data?.research?.slug ?? "",
     surveyId: data?.research?.surveyId ?? "",
@@ -53,8 +57,6 @@ export function ResearchForm({
     },
     onSubmit: async ({ value }) => {
       let res;
-
-      console;
 
       if (id) {
         res = await api.researchs[":id"].$put({
@@ -104,6 +106,30 @@ export function ResearchForm({
         >
           <div className="grid gap-6">
             <div className="grid gap-3">
+              <form.Field
+                name="createdAt"
+                children={(field) => {
+                  const dateValue = field.state.value
+                    ? new Date(field.state.value)
+                    : undefined;
+
+                  return (
+                    <div className="grid gap-3">
+                      <Label>Data</Label>
+
+                      <DatePicker
+                        value={dateValue}
+                        onChange={(date) => {
+                          field.handleChange(date ? date.toISOString() : "");
+                        }}
+                      />
+
+                      <FieldError error={field.state.meta.errors?.join(", ")} />
+                    </div>
+                  );
+                }}
+              />
+
               <form.Field
                 name="name"
                 children={(field) => (

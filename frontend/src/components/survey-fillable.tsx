@@ -67,7 +67,6 @@ export function SurveyFillable({
   }, [list]);
 
   useEffect(() => {
-    console.log("Hello");
     if (questions?.length !== list.length) {
       setList(questions ?? []);
     }
@@ -134,7 +133,7 @@ export function SurveyFillable({
   }
 
   return (
-    <Card className="p-8 pb-10 max-w-lg w-full">
+    <Card className="p-8 pb-10 w-full">
       <div className="flex gap-2 justify-between items-start">
         <div className="space-y-2">
           <h2 className="text-2xl font-bold">{survey.name}</h2>

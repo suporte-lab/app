@@ -7,6 +7,8 @@ import { ulid } from "ulid";
 import { mailShareLinkTemplate, resend, validateEmail } from "../services/mail";
 import { getColumnLetter, isBooleanLike } from "../../frontend/src/lib/utils";
 import Papa from "papaparse";
+import { formatDate } from "date-fns";
+import { parse } from "date-fns/parse";
 
 export const researchsRoute = new Hono()
   .get("/", async (c) => {
@@ -14,6 +16,7 @@ export const researchsRoute = new Hono()
       .selectFrom("research")
       .selectAll()
       .where("isDeleted", "!=", true)
+      .orderBy("createdAt", "desc")
       .execute();
 
     return c.json({ data });
@@ -92,14 +95,24 @@ export const researchsRoute = new Hono()
       results[a.projectId] ??= {};
       results[a.projectId]![a.questionId] ??= [];
       results[a.projectId]![a.questionId]!.push(a.answer);
+
+      results[a.projectId]!["createdAt"] = [a.createdAt.toISOString()];
     }
+
+    const sortedResults = Object.fromEntries(
+      Object.entries(results).sort(([, a], [, b]) => {
+        const dateA = new Date(a.createdAt?.[0] ?? 0).getTime();
+        const dateB = new Date(b.createdAt?.[0] ?? 0).getTime();
+        return dateB - dateA; // newest first
+      })
+    );
 
     const questions: Record<string, string> = {};
     for (const question of questionsData) {
       questions[question.id] = question.question;
     }
 
-    return c.json({ data: { results, research, questions } });
+    return c.json({ data: { results: sortedResults, research, questions } });
   })
   .get("/projects/:id", async (c) => {
     const answersData = await db
@@ -242,11 +255,13 @@ export const researchsRoute = new Hono()
 
       for (let i = 0; i < csv.data.length; i++) {
         const rowNumber = i + 2;
-        const row = csv.data[i];
+        const row = csv.data[i] as Record<string, string>;
 
         if (row instanceof Object !== true) continue;
 
         const projectName = Object.values(row)[0];
+        if (!projectName) continue;
+
         const project = await db
           .selectFrom("project")
           .select(["id"])
@@ -254,6 +269,10 @@ export const researchsRoute = new Hono()
           .executeTakeFirst();
 
         if (!project) continue;
+
+        const createdAt = row["Data (01-01-1111)"]
+          ? parse(row["Data (01-01-1111)"], "dd-MM-yyyy", new Date())
+          : new Date();
 
         for (let x = 1; x < Object.keys(row).length; x++) {
           const questionName = Object.keys(row)[x];
@@ -317,6 +336,43 @@ export const researchsRoute = new Hono()
               continue;
             }
           }
+
+          console.log(question.type);
+
+          if (question.type === "select-multi") {
+            // Split the answer into an array
+            const selectedValues = answer
+              .split(",")
+              .map((v) => v.trim())
+              .filter(Boolean); // remove empty strings
+
+            // Get allowed options from DB
+            const rows =
+              (await db
+                .selectFrom("surveyQuestionMetadata")
+                .select(["value"])
+                .where("surveyQuestionId", "=", question.id)
+                .execute()) ?? [];
+            const options = rows.map((r) => r.value) ?? [];
+
+            // Check if every selected value is valid
+            const invalidValues = selectedValues.filter(
+              (v) => !options.includes(v)
+            );
+
+            if (invalidValues.length > 0) {
+              log.push({
+                type: "error",
+                message: `Linha ${rowNumber}, Coluna ${getColumnLetter(
+                  x
+                )} inválida. Valores inválidos: "${invalidValues.join(
+                  ", "
+                )}". Devem ser um dos seguintes: "${options.join(", ")}".`,
+              });
+              invalidRows.push(project.id);
+              continue;
+            }
+          }
         }
 
         if (invalidRows.includes(project.id)) continue;
@@ -351,7 +407,7 @@ export const researchsRoute = new Hono()
           if (existingAnswer) {
             await db
               .updateTable("surveyAnswer")
-              .set({ answer: answer })
+              .set({ answer: answer, createdAt })
               .where("id", "=", existingAnswer.id)
               .execute();
 
@@ -366,6 +422,7 @@ export const researchsRoute = new Hono()
                 surveyId: research.surveyId,
                 questionId: question.id,
                 answer: answer,
+                createdAt,
               })
               .execute();
 
@@ -373,11 +430,13 @@ export const researchsRoute = new Hono()
           }
 
           if (
-            !log.find((l) => l.message == `Linha ${i} atualizada com sucesso.`)
+            !log.find(
+              (l) => l.message == `Linha ${rowNumber} atualizada com sucesso.`
+            )
           ) {
             log.push({
               type: "success",
-              message: `Linha ${i} atualizada com sucesso.`,
+              message: `Linha ${rowNumber} atualizada com sucesso.`,
             });
           }
         }
@@ -392,6 +451,8 @@ export const researchsRoute = new Hono()
     zValidator("json", setResearchSchema),
     async (c) => {
       const payload = c.req.valid("json");
+
+      console.log(payload);
 
       const data = await db
         .updateTable("research")

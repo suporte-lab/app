@@ -30,6 +30,7 @@ import {
   fetchResearchsResultsOptions,
   fetchSurveysQuestionsOptions,
 } from "@/lib/api";
+import { ScrollArea } from "./ui/scroll-area";
 
 export function MonitorPublicView() {
   const { data: municipalities } = useSuspenseQuery(
@@ -51,6 +52,182 @@ export function MonitorPublicView() {
   const categoriesMap = new Map(categories.map((c) => [c.id, c]));
   const projectsMap = new Map(projects.map((p) => [p.id, p]));
   const question = questions.find((q) => q.id === questions[0]?.id);
+
+  function getBooleanChartData(selectedQuestion: string) {
+    const result: {
+      name: string;
+      data: { yes: number; no: number; noData: number }[];
+    }[] = [];
+
+    for (const [researchId, research] of Object.entries(
+      researchsResults.researchs
+    )) {
+      if (filterResearchs.length && !filterResearchs.includes(researchId)) {
+        continue;
+      }
+
+      const totalProjects = projects.filter(
+        (p) =>
+          p.municipalityId === research.research.municipalityId &&
+          (selectedMunicipality === "all" ||
+            selectedMunicipality === p.municipalityId)
+      );
+
+      let yesCount = 0;
+      let noCount = 0;
+
+      // iterate over ALL projects of this research
+      for (const [projectId, project] of Object.entries(research.results)) {
+        if (filterProjects.length && !filterProjects.includes(projectId))
+          continue;
+
+        const projectData = projectsMap.get(projectId);
+        if (!projectData) continue;
+
+        if (
+          selectedMunicipality !== "all" &&
+          projectData.municipalityId !== selectedMunicipality
+        ) {
+          continue;
+        }
+
+        const categoryData = categoriesMap.get(projectData.categoryId);
+        if (!categoryData) continue;
+
+        if (
+          filterCategories.length &&
+          !filterCategories.includes(categoryData.id)
+        )
+          continue;
+
+        // Get answer for this question
+        const answer = project[selectedQuestion]?.[0];
+
+        if (answer === "true") yesCount++;
+        else if (answer === "false") noCount++;
+      }
+
+      if (totalProjects.length > 0) {
+        result.push({
+          name:
+            research.research.name ||
+            format(research.research.createdAt, "dd/MM/yyyy"),
+          data: [
+            {
+              yes: yesCount,
+              no: noCount,
+              noData: Math.max(0, totalProjects.length - yesCount - noCount),
+            },
+          ],
+        });
+      }
+    }
+
+    return result;
+  }
+
+  function getNumberChartData(selectedQuestion: string) {
+    const data: {
+      name: string;
+      items: { name: string; total: number }[];
+    }[] = [];
+
+    for (const [researchId, research] of Object.entries(
+      researchsResults.researchs
+    )) {
+      if (filterResearchs.length && !filterResearchs.includes(researchId)) {
+        continue;
+      }
+
+      const researchEntry = {
+        name: research.research.name,
+        items: [] as { name: string; total: number }[],
+      };
+
+      for (const [projectId, project] of Object.entries(research.results)) {
+        if (filterProjects.length && !filterProjects.includes(projectId)) {
+          continue;
+        }
+
+        const projectData = projectsMap.get(projectId);
+        if (!projectData) continue;
+
+        if (
+          selectedMunicipality !== "all" &&
+          projectData.municipalityId !== selectedMunicipality
+        ) {
+          continue;
+        }
+
+        const rawValue = project[selectedQuestion]?.[0];
+        if (!rawValue) continue;
+
+        const value = Number(rawValue);
+        if (Number.isNaN(value)) continue;
+
+        researchEntry.items.push({
+          name: projectData.name,
+          total: value,
+        });
+      }
+
+      if (researchEntry.items.length) {
+        data.push(researchEntry);
+      }
+    }
+
+    return data;
+  }
+
+  function getTextChartData(selectedQuestion: string) {
+    const data: {
+      name: string;
+      items: { name: string; answer: string }[];
+    }[] = [];
+
+    for (const [researchId, research] of Object.entries(
+      researchsResults.researchs
+    )) {
+      if (filterResearchs.length && !filterResearchs.includes(researchId)) {
+        continue;
+      }
+
+      const researchEntry = {
+        name: research.research.name,
+        items: [] as { name: string; answer: string }[],
+      };
+
+      for (const [projectId, project] of Object.entries(research.results)) {
+        if (filterProjects.length && !filterProjects.includes(projectId)) {
+          continue;
+        }
+
+        const projectData = projectsMap.get(projectId);
+        if (!projectData) continue;
+
+        if (
+          selectedMunicipality !== "all" &&
+          projectData.municipalityId !== selectedMunicipality
+        ) {
+          continue;
+        }
+
+        const answer = project[selectedQuestion]?.[0];
+        if (!answer) continue;
+
+        researchEntry.items.push({
+          name: projectData.name,
+          answer,
+        });
+      }
+
+      if (researchEntry.items.length) {
+        data.push(researchEntry);
+      }
+    }
+
+    return data;
+  }
 
   function getChartData(selectedQuestion: string) {
     const data: { name: string; [key: string]: number | string }[] = [];
@@ -90,38 +267,22 @@ export function MonitorPublicView() {
         for (const [questionId, answer] of Object.entries(project)) {
           if (!question || questionId !== selectedQuestion) continue;
 
-          const date = format(research.research.createdAt, "dd/MM/yyyy");
+          // const date = format(research.research.createdAt, "dd/MM/yyyy");
+          const indexValue = research.research.name;
 
-          const index = data.findIndex((d) => d.name === date);
+          const index = data.findIndex((d) => d.name === indexValue);
 
-          if (question.type === "number") {
-            const value = parseFloat(answer?.[0] ?? "0");
-
-            if (index === -1) {
-              data.push({
-                name: date,
-                [categoryData.name]: value,
-              });
-            } else {
-              const currentValue = parseFloat(
-                (data[index][categoryData.name] as string) ?? "0"
-              );
-
-              data[index][categoryData.name] = value + currentValue;
-            }
+          if (index === -1) {
+            data.push({
+              name: indexValue,
+              [answer[0]]: 1,
+            });
           } else {
-            if (index === -1) {
-              data.push({
-                name: date,
-                [answer[0]]: 1,
-              });
-            } else {
-              const currentValue = parseFloat(
-                (data[index][answer[0]] as string) ?? "0"
-              );
+            const currentValue = parseFloat(
+              (data[index][answer[0]] as string) ?? "0"
+            );
 
-              data[index][answer[0]] = currentValue + 1;
-            }
+            data[index][answer[0]] = currentValue + 1;
           }
         }
       }
@@ -279,6 +440,14 @@ export function MonitorPublicView() {
       </div>
       <div className="w-full flex-1 space-y-10">
         {questions
+          .sort((a, b) => {
+            const getNumber = (q: string) => {
+              const match = q.match(/^(\d+)\./);
+              return match ? parseInt(match[1], 10) : Infinity;
+            };
+
+            return getNumber(a.question) - getNumber(b.question);
+          })
           .filter((question) => question.isPublic)
           .map((question) => (
             <div className="transition-all rounded-2xl border border-dashed overflow-hidden relative isolate p-10 space-y-16">
@@ -288,7 +457,26 @@ export function MonitorPublicView() {
                   {question?.question}
                 </h1>
               </div>
-              <Chart data={getChartData(question.id)} />
+
+              {(() => {
+                const data = getChartData(question.id);
+
+                switch (question.type) {
+                  case "text":
+                    return <TextChart data={getTextChartData(question.id)} />;
+                  case "number":
+                    return (
+                      <NumberChart data={getNumberChartData(question.id)} />
+                    );
+                  case "boolean":
+                    return (
+                      <BooleanChart data={getBooleanChartData(question.id)} />
+                    );
+                  default:
+                    return <Chart data={data} />;
+                }
+              })()}
+
               <div className="space-y-4">
                 {filterResearchs.length > 0 && (
                   <div className="border border-dashed rounded-lg p-4 flex gap-4">
@@ -392,6 +580,241 @@ const colors = [
   "#e0e7ff", // in
 ];
 
+function TextChart({
+  data,
+}: {
+  data: { name: string; items: { name: string; answer: string }[] }[];
+}) {
+  if (!data.length) {
+    return (
+      <div className="flex items-center justify-center aspect-16/7 w-full border border-dashed rounded-lg">
+        <p className="text-sm font-medium text-slate-500">Sem resultados</p>
+      </div>
+    );
+  }
+
+  return (
+    <ScrollArea className="h-96">
+      <div className="flex flex-col gap-6">
+        {data.map((research) => (
+          <div key={research.name} className="space-y-4">
+            {/* Research name */}
+            <h3 className="text-sm font-medium text-slate-500">
+              {research.name}
+            </h3>
+
+            {/* Projects */}
+            <div className="space-y-3">
+              {research.items.map((item) => (
+                <div
+                  key={item.name}
+                  className="border border-dashed rounded-lg p-4"
+                >
+                  <h4 className="text-sm font-medium text-slate-600">
+                    {item.name}
+                  </h4>
+                  <p className="text-base text-slate-900">{item.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+}
+
+function NumberChart({
+  data,
+}: {
+  data: {
+    name: string;
+    items: { name: string; total: number }[];
+  }[];
+}) {
+  if (!data.length) {
+    return (
+      <div className="flex items-center justify-center aspect-16/7 w-full border border-dashed rounded-lg">
+        <p className="text-sm font-medium text-slate-500">Sem resultados</p>
+      </div>
+    );
+  }
+
+  // Aggregate total per research
+  const chartData = data.map((research) => ({
+    name: research.name,
+    value: research.items.reduce((sum, item) => sum + item.total, 0),
+  }));
+
+  return (
+    <div className="aspect-16/6 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData}>
+          <CartesianGrid stroke="var(--color-blue-100)" strokeDasharray="3 3" />
+
+          <XAxis
+            dataKey="name"
+            // interval={0}
+            tick={
+              chartData.length <= 6
+                ? {
+                    fill: "var(--color-blue-900)",
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }
+                : false
+            }
+            axisLine={{ stroke: "var(--color-blue-100)" }}
+            tickLine={false}
+            // tickFormatter={(value) => truncate(value)}
+          />
+
+          <YAxis
+            tick={{ fill: "var(--color-blue-900)", fontSize: 12 }}
+            axisLine={{ stroke: "var(--color-blue-100)" }}
+            tickLine={false}
+          />
+
+          <Tooltip
+            content={CustomNumberTooltip}
+            formatter={(value) => value}
+            labelFormatter={(label) => label}
+          />
+
+          <Bar dataKey="value" fill={colors[0]} maxBarSize={64}>
+            <LabelList dataKey="value" content={renderCustomLabel} />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function BooleanChart({
+  data,
+}: {
+  data: { name: string; data: { yes: number; no: number; noData: number }[] }[];
+}) {
+  if (!data.length) {
+    return (
+      <div className="flex items-center justify-center aspect-16/7 w-full border border-dashed rounded-lg">
+        <p className="text-sm font-medium text-slate-500">Sem resultados</p>
+      </div>
+    );
+  }
+
+  // Flatten for Recharts: each research becomes { name, yes, no, noData }
+  const chartData = data.map((research) => ({
+    name: research.name,
+    yes: research.data[0]?.yes ?? 0,
+    no: research.data[0]?.no ?? 0,
+    noData: research.data[0]?.noData ?? 0,
+  }));
+
+  const columns: Array<keyof typeof columnLabels> = ["no", "yes", "noData"];
+  const columnLabels = {
+    no: "Nāo",
+    yes: "Sim",
+    noData: "Projetos sem dados",
+  };
+
+  return (
+    <div className="aspect-16/6 w-full">
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-2.5 mb-5">
+        {columns.map((key, i) => (
+          <div
+            key={key}
+            className="flex items-center gap-3 border border-dashed border-blue-100 py-1.5 px-3 rounded-md"
+          >
+            <div
+              className="size-4 shrink-0 rounded-[2px]"
+              style={{ backgroundColor: colors[i] }}
+            />
+            <span className="text-xs font-medium">{columnLabels[key]}</span>
+          </div>
+        ))}
+      </div>
+
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={chartData}
+          margin={{ top: 16, right: 0, left: 0, bottom: 0 }}
+        >
+          <CartesianGrid stroke="var(--color-blue-100)" strokeDasharray="3 3" />
+
+          <XAxis
+            dataKey="name"
+            interval={0}
+            tick={
+              chartData.length <= 6
+                ? {
+                    fill: "var(--color-blue-900)",
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }
+                : false
+            }
+            axisLine={{ stroke: "var(--color-blue-100)" }}
+            tickLine={false}
+          />
+
+          <YAxis
+            tick={{ fill: "var(--color-blue-900)", fontSize: 12 }}
+            axisLine={{ stroke: "var(--color-blue-100)" }}
+            tickLine={false}
+          />
+
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload) return null;
+              return (
+                <div className="bg-background border border-border rounded-lg p-2 max-w-96 text-sm font-medium">
+                  <div className="space-y-1">
+                    {payload.map((p: any, i: number) => {
+                      // Only use keys that exist in columnLabels
+                      const key = p.name as keyof typeof columnLabels;
+                      return (
+                        <div key={i} className="flex items-center gap-1.5 px-2">
+                          <div
+                            className="size-4 shrink-0 rounded-[2px]"
+                            style={{ backgroundColor: colors[i] }}
+                          />
+                          <span className="text-sm font-medium flex-1 truncate">
+                            {columnLabels[key] ?? p.name}
+                          </span>
+                          <span className="text-sm font-medium min-w-8 text-right">
+                            {p.value}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500 truncate">
+                    {label}
+                  </div>
+                </div>
+              );
+            }}
+          />
+
+          {columns.map((key, i) => (
+            <Bar
+              key={key}
+              stackId="a"
+              dataKey={key}
+              fill={colors[i]}
+              maxBarSize={64}
+            >
+              <LabelList dataKey={key} content={renderCustomLabel} />
+            </Bar>
+          ))}
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 function Chart({ data }: { data: { [key: string]: number | string }[] }) {
   const [type, setType] = useState<"total" | "percentage">("total");
 
@@ -406,24 +829,33 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
   const columns = Object.keys(data[0]).filter((key) => key !== "name");
 
   const totals: Record<string, number> = {};
-  for (const row of data) {
-    for (const key of columns) {
-      if (typeof row[key] === "string") continue;
 
-      if (!totals[row.name]) {
-        totals[row.name] = row[key];
+  for (const row of data) {
+    const rowName = row.name;
+
+    if (!totals[rowName]) {
+      totals[rowName] = 0;
+    }
+
+    for (const key of columns) {
+      const value = row[key];
+
+      if (typeof value !== "number" || !Number.isFinite(value)) {
         continue;
       }
 
-      totals[row.name] = (totals[row.name] || 0) + row[key];
+      totals[rowName] += value;
     }
   }
 
   const values: { [key: string]: number | string }[] = [];
-  for (let i = 0; i < data.length; i++) {
-    const row = data[i];
 
-    const newRow: { [key: string]: number | string } = { name: row.name };
+  for (const row of data) {
+    const total = totals[row.name] ?? 0;
+
+    const newRow: { [key: string]: number | string } = {
+      name: row.name,
+    };
 
     for (const [key, val] of Object.entries(row)) {
       if (typeof val === "string") {
@@ -431,13 +863,25 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
         continue;
       }
 
-      if (type == "total") {
+      if (typeof val !== "number" || !Number.isFinite(val)) {
+        newRow[key] = 0;
+        continue;
+      }
+
+      if (type === "total") {
         newRow[key] = val;
         continue;
       }
 
-      newRow[key] = ((val * 100) / totals[row.name]).toFixed(1);
+      // prevent divide-by-zero
+      if (total === 0) {
+        newRow[key] = "0.0";
+        continue;
+      }
+
+      newRow[key] = ((val * 100) / total).toFixed(1);
     }
+
     values.push(newRow);
   }
 
@@ -493,11 +937,15 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
             {/* clean axis with muted labels */}
             <XAxis
               dataKey="name"
-              tick={{
-                fill: "var(--color-blue-900)",
-                fontSize: 12,
-                fontWeight: 500,
-              }}
+              tick={
+                data.length <= 6
+                  ? {
+                      fill: "var(--color-blue-900)",
+                      fontSize: 12,
+                      fontWeight: 500,
+                    }
+                  : false
+              }
               axisLine={{ stroke: "var(--color-blue-100)" }}
               tickLine={false}
             />
@@ -507,7 +955,10 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
               tickLine={false}
             />
 
-            <Tooltip content={CustomTooltip} />
+            <Tooltip
+              content={CustomTooltip}
+              labelFormatter={(label) => label}
+            />
 
             {columns.map((key, i) => {
               return (
@@ -529,12 +980,48 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
   );
 }
 
+const CustomNumberTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: any;
+  label?: string | number;
+}) => {
+  if (!active || !payload || !payload.length) return null;
+
+  // Only one bar per research
+  const dataPoint = payload[0];
+
+  return (
+    <div className="bg-background border border-border rounded-lg p-2 max-w-96 text-sm font-medium">
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5 px-2">
+          <div
+            className="size-4 shrink-0 rounded-[2px]"
+            style={{ backgroundColor: colors[0] }}
+          />
+          <span className="text-sm font-medium flex-1 truncate">
+            {label} {/* Research name */}
+          </span>
+          <span className="text-sm font-medium min-w-8 text-right">
+            {dataPoint.value}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CustomTooltip = ({
   active,
   payload,
+  label,
 }: {
   active: boolean;
   payload: any;
+  label?: string | number;
 }) => {
   const isVisible = active && payload && payload.length;
 
@@ -542,7 +1029,7 @@ const CustomTooltip = ({
 
   return (
     <div
-      className="bg-background border border-border rounded-lg p-2 max-w-48 text-sm font-medium"
+      className="bg-background border border-border rounded-lg p-2 max-w-96 text-sm font-medium"
       style={{ visibility: isVisible ? "visible" : "hidden" }}
     >
       {isVisible && (
@@ -553,13 +1040,17 @@ const CustomTooltip = ({
                 className="size-4 shrink-0 rounded-[2px]"
                 style={{ backgroundColor: colors[i] }}
               />
-              <span className="text-sm font-medium w-12 truncate">
+              <span className="text-sm font-medium flex-1 truncate">
                 {stack.name}
               </span>
-              <div className="h-4 w-1px bg-blue-100 rounded-full mx-1"></div>
-              <span className="text-sm font-medium">{stack.value}</span>
+              <span className="text-sm font-medium min-w-8 text-right">
+                {stack.value}
+              </span>
             </div>
           ))}
+          <div className="px-2">
+            <span className="text-xs text-slate-500 truncate">{label}</span>
+          </div>
         </div>
       )}
     </div>

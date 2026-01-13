@@ -238,6 +238,9 @@ export const projectsRoute = new Hono()
         const number = values[9];
         const zipCode = values[10];
 
+        const children = values[11];
+        const workers = values[12];
+
         if (!street || !zipCode || !number) {
           log.push({
             type: "error",
@@ -323,6 +326,8 @@ export const projectsRoute = new Hono()
             addressZipCode: zipCode,
             latitude: lat,
             longitude: lng,
+            childrenInCare: children ? parseInt(children ?? 0) : 0,
+            numberOfEmployees: workers ? parseInt(workers ?? 0) : 0,
           })
           .execute();
 

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, csvEscape } from "@/lib/utils";
 import { fetchProjectsOptions, fetchResearchOptions } from "@/lib/api";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -32,15 +32,31 @@ export function ResearchImportDialog({
 
   function generateImportCSV() {
     if (!data || !projects) return;
+
     const questions = Object.values(data.questions);
-    const headers = "Unidade," + questions.join(",") + "\n";
+
+    // Escape headers
+    const headers =
+      ["Unidade", ...questions.map(csvEscape), "Data (01-01-1111)"].join(",") +
+      "\n";
+
     const rows = projects
-      .map((p) => p.name + Array(questions.length).map((_) => ","))
+      .filter((p) => data.research.municipalityId === p.municipalityId)
+      .map((p) => {
+        const row = [
+          csvEscape(p.name), // Unidade
+          ...questions.map(() => ""), // empty cells for questions
+          "", // Data
+        ];
+        return row.join(",");
+      })
       .join("\n");
+
     const csv = headers + rows;
 
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
     a.download = "import.csv";

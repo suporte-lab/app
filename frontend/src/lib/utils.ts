@@ -36,3 +36,16 @@ export function getColumnLetter(index: number): string {
 
   return result;
 }
+
+export function csvEscape(value: unknown) {
+  if (value == null) return "";
+
+  const str = String(value);
+
+  // If it contains comma, quote, or newline → wrap in quotes
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+
+  return str;
+}

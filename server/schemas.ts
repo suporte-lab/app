@@ -120,6 +120,7 @@ export const setResearchSchema = z.object({
   municipalityId: z.string().min(1, "Campo obrigatório"),
   name: z.string().min(1, "Campo obrigatório"),
   slug: z.string().min(1, "Campo obrigatório"),
+  createdAt: z.string(),
 });
 
 export type SetResearchParams = z.infer<typeof setResearchSchema>;

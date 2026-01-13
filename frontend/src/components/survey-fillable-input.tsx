@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
+import { Checkbox } from "./ui/checkbox";
 
 export function SurveyFillableInput(params: {
   type: string;
@@ -31,6 +32,7 @@ export function SurveyFillableInput(params: {
       {type === "date" && <SurveyDate {...params} />}
       {type === "boolean" && <SurveyBoolean {...params} />}
       {type === "select" && <SurveySelect {...params} />}
+      {type === "select-multi" && <SurveySelectMulti {...params} />}
     </div>
   );
 }
@@ -268,6 +270,76 @@ function SurveySelect({
             ))}
           </SelectContent>
         </Select>
+      )}
+    </Label>
+  );
+}
+function SurveySelectMulti({
+  question,
+  error,
+  description,
+  options,
+  onChange,
+  value,
+}: {
+  question: string;
+  error?: string;
+  description?: string | null;
+  options?: { id: string; value: string }[];
+  onChange?: (value: string) => void;
+  value?: string;
+}) {
+  const [inputValue, setInputValue] = useState(value ?? "");
+
+  const opts = options?.filter((o) => o.value.length > 0);
+
+  useEffect(() => {
+    setInputValue(value ?? "");
+  }, [value]);
+
+  const selectedValues = inputValue
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  function toggleValue(val: string) {
+    let next: string[];
+
+    if (selectedValues.includes(val)) {
+      next = selectedValues.filter((v) => v !== val);
+    } else {
+      next = [...selectedValues, val];
+    }
+
+    const result = next.join(",");
+    setInputValue(result);
+    onChange?.(result);
+  }
+
+  return (
+    <Label className="flex flex-col gap-2 items-start">
+      <SurveyFormInputHeader
+        question={question}
+        description={description}
+        error={error}
+      />
+
+      {!opts?.length ? (
+        <div className="p-2 text-sm text-muted-foreground font-normal border rounded-md border-dashed w-full text-center">
+          Nenhuma opção
+        </div>
+      ) : (
+        <div>
+          {opts.map((option) => (
+            <label key={option.id} className="flex items-start gap-2 py-2">
+              <Checkbox
+                checked={selectedValues.includes(option.value)}
+                onCheckedChange={() => toggleValue(option.value)}
+              />
+              <span>{option.value}</span>
+            </label>
+          ))}
+        </div>
       )}
     </Label>
   );

@@ -25,7 +25,7 @@ export function ProjectsImportDialog({
 
   function generateImportCSV() {
     const headers =
-      "Estado(SP),Municipio,Categoria,Unidade,Responsavel(Nome),Responsavel(Cargo),Responsavel(Telefone),Responsavel(Email),Rua,Numero,CEP";
+      "Estado(SP),Municipio,Categoria,Unidade,Responsavel(Nome),Responsavel(Cargo),Responsavel(Telefone),Responsavel(Email),Rua,Numero,CEP,Crianças,Trabalhadores";
     const csv = headers;
 
     const blob = new Blob([csv], { type: "text/csv" });
@@ -57,7 +57,6 @@ export function ProjectsImportDialog({
     }
     const body = await res.json();
 
-    console.log(body);
     setLog(body.log);
 
     setIsLoading(false);

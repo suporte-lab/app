@@ -241,10 +241,11 @@ function SurveyQuestionTypeSelector({
           {/* <SelectItem value="date">Date</SelectItem> */}
           <SelectItem value="boolean">Verdadeiro/Falso</SelectItem>
           <SelectItem value="select">Seleção</SelectItem>
+          <SelectItem value="select-multi">Múltipla escolha</SelectItem>
         </SelectContent>
       </Select>
 
-      {value === "select" && (
+      {value && ["select", "select-multi"].includes(value) && (
         <div className="space-y-2">
           <Label>Opções</Label>
           {options.map((option, index) => (

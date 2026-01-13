@@ -115,7 +115,7 @@ function RouteComponent() {
           </Card>
           <Card className="p-6 flex-1">
             <div className="flex gap-5 items-start">
-              <div className="p-2 bg-muted size-10 rounded-md mb-4">
+              <div className="p-2 bg-muted size-10 rounded-md mb-4 shrink-0">
                 <MapPin className="size-full" />
               </div>
               <div className="flex-1">
