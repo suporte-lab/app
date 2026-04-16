@@ -22,7 +22,7 @@ export const columns: ColumnDef<{
 }>[] = [
   {
     accessorKey: "createdAt",
-    header: "Criado em",
+    header: "Data",
     cell: ({ row }) => {
       return (
         <span className="text-sm">
