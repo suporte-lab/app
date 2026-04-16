@@ -5,16 +5,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { DownloadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   fetchProjectsOptions,
   fetchResearchOptions,
   fetchResearchsOptions,
+  fetchMunicipalitiesOptions,
 } from "@/lib/api";
 
 export const columns: ColumnDef<{
   id: string;
   name: string;
   createdAt: string;
+  municipalityId: string;
 }>[] = [
   {
     accessorKey: "createdAt",
@@ -32,6 +36,15 @@ export const columns: ColumnDef<{
     header: "Nome",
     cell: ({ row }) => {
       return <span className="text-sm font-medium">{row.original.name}</span>;
+    },
+  },
+  {
+    accessorKey: "municipality",
+    header: "Município",
+    cell: ({ row }) => {
+      const { data: municipalities } = useQuery(fetchMunicipalitiesOptions());
+      const municipality = municipalities?.find(m => m.id === row.original.municipalityId);
+      return <span className="text-sm">{municipality?.name || "N/A"}</span>;
     },
   },
   {
@@ -100,6 +113,80 @@ export const columns: ColumnDef<{
         >
           {missing ?? 0}
         </Badge>
+      );
+    },
+  },
+  {
+    id: "download",
+    header: "Download",
+    cell: ({ row }) => {
+      const { data: researchData } = useQuery(fetchResearchOptions(row.original.id));
+      const { data: projects } = useQuery(fetchProjectsOptions());
+
+      const downloadCSV = () => {
+        if (!researchData || !projects) return;
+
+        const municipalityProjects = projects.filter(
+          (p) => p.municipalityId === researchData.research.municipalityId
+        );
+
+        const output: { [key: string]: string | number }[] = [];
+
+        for (const project of municipalityProjects) {
+          const results = researchData.results[project.id] || {};
+
+          const row: Record<string, string> = {
+            Nome: project.name,
+          };
+
+          for (const questionId of Object.keys(researchData.questions)) {
+            const question = researchData.questions[questionId];
+            row[question] = results[questionId]?.join(", ") ?? "";
+          }
+
+          output.push(row);
+        }
+
+        if (output.length === 0) {
+          // If no projects, create a header-only CSV
+          const headers = ["Nome", ...Object.values(researchData.questions)].map(h => `"${h}"`).join(",") + "\n";
+          const csv = headers;
+
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${researchData.research.name}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          return;
+        }
+
+        const headers = Object.keys(output[0]).map(h => `"${h}"`).join(",") + "\n";
+        const rows = output.map((obj) => Object.values(obj).map(v => `"${v}"`).join(",")).join("\n");
+        const csv = headers + rows;
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${researchData.research.name}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      };
+
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            downloadCSV();
+          }}
+          disabled={!researchData || !projects}
+        >
+          <DownloadIcon className="h-4 w-4" />
+        </Button>
       );
     },
   },
