@@ -35,7 +35,7 @@ export const columns: ColumnDef<{
     accessorKey: "name",
     header: "Nome",
     cell: ({ row }) => {
-      return <span className="text-sm font-medium">{row.original.name}</span>;
+      return <span className="text-sm font-medium truncate block max-w-[200px]" title={row.original.name}>{row.original.name}</span>;
     },
   },
   {
@@ -44,7 +44,7 @@ export const columns: ColumnDef<{
     cell: ({ row }) => {
       const { data: municipalities } = useQuery(fetchMunicipalitiesOptions());
       const municipality = municipalities?.find(m => m.id === row.original.municipalityId);
-      return <span className="text-sm">{municipality?.name || "N/A"}</span>;
+      return <span className="text-sm truncate block max-w-[150px]" title={municipality?.name || "N/A"}>{municipality?.name || "N/A"}</span>;
     },
   },
   {
