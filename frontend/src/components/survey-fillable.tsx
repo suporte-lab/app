@@ -57,18 +57,12 @@ export function SurveyFillable({
   const [list, setList] = useState(questions ?? []);
 
   useEffect(() => {
-    (async () => {
-      const questions = list.map((question) => question.id);
-      await api.surveys[":id"].questions.order.$post({
-        param: { id },
-        json: { questions },
-      });
-    })();
-  }, [list]);
+    const nextQuestions = questions ?? [];
+    const listIds = list.map((question) => question.id);
+    const questionIds = nextQuestions.map((question) => question.id);
 
-  useEffect(() => {
-    if (questions?.length !== list.length) {
-      setList(questions ?? []);
+    if (nextQuestions.length !== list.length || listIds.join(",") !== questionIds.join(",")) {
+      setList(nextQuestions);
     }
   }, [questions]);
 
@@ -154,8 +148,16 @@ export function SurveyFillable({
         <ReactSortable
           list={list}
           setList={setList}
-          onEnd={() => {
-            setTimeout(async () => {}, 100);
+          onEnd={async () => {
+            if (!edit) {
+              return;
+            }
+
+            const order = list.map((question) => question.id);
+            await api.surveys[":id"].questions.order.$post({
+              param: { id },
+              json: { questions: order },
+            });
           }}
           animation={200}
           className="space-y-6"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Map } from "@/components/map";
 import {
@@ -53,6 +53,7 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
   const { data: categories } = useSuspenseQuery(fetchCategoriesOptions());
   const { data: projects } = useSuspenseQuery(fetchProjectsOptions());
   const { data: questions } = useSuspenseQuery(fetchSurveysQuestionsOptions());
+  const { data: allResearchs } = useSuspenseQuery(fetchResearchsOptions());
   const { data: researchsResults } = useSuspenseQuery(
     fetchResearchsResultsOptions()
   );
@@ -74,6 +75,10 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
 
   const municipality = municipalities.find(
     (m) => m.id === selectedMunicipality
+  );
+
+  const filteredResearchs = (allResearchs ?? []).filter(
+    (research) => research.municipalityId === selectedMunicipality
   );
 
   return (
@@ -145,10 +150,12 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
           />
         </div>
         <MapFilterQuestions
+          municipalityId={selectedMunicipality}
           filterResearchs={filterResearchs}
           onChange={(filters) => {
             setFilterResearchs(filters);
           }}
+          researchOptions={filteredResearchs}
         />
       </div>
       <div className="flex-1 grid aspect-square xl:aspect-auto xl:size-full relative">
@@ -231,9 +238,17 @@ export function MapSearch({ isPublic }: { isPublic?: boolean }) {
 }
 
 function MapFilterQuestions({
+  municipalityId,
   filterResearchs,
   onChange,
+  researchOptions,
 }: {
+  municipalityId: string;
+  researchOptions: {
+    id: string;
+    name: string;
+    municipalityId: string;
+  }[];
   filterResearchs: {
     id: string;
     researchId: string;
@@ -251,7 +266,6 @@ function MapFilterQuestions({
     }[]
   ) => void;
 }) {
-  const { data: researchs } = useSuspenseQuery(fetchResearchsOptions());
   const { data: questions } = useSuspenseQuery(fetchSurveysQuestionsOptions());
   const { data: researchsResults } = useSuspenseQuery(
     fetchResearchsResultsOptions()
@@ -261,6 +275,25 @@ function MapFilterQuestions({
   const [selectedResearch, setSelectedResearch] = useState("");
   const [selectedQuestion, setSelectedQuestion] = useState("");
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
+
+  const availableResearchs = researchOptions ?? [];
+
+  useEffect(() => {
+    setSelectedResearch("");
+    setSelectedQuestion("");
+    setSelectedResults([]);
+  }, [municipalityId]);
+
+  useEffect(() => {
+    if (
+      selectedResearch &&
+      !availableResearchs.some((research) => research.id === selectedResearch)
+    ) {
+      setSelectedResearch("");
+      setSelectedQuestion("");
+      setSelectedResults([]);
+    }
+  }, [availableResearchs, selectedResearch]);
 
   const questionDetails = questions.find((q) => q.id === selectedQuestion);
 
@@ -289,7 +322,7 @@ function MapFilterQuestions({
           <div className="text-sm  px-2 py-1 rounded-md flex-1 truncate min-h-9 flex items-center border border-dashed">
             <div className="flex gap-1">
               <span className="text-xs">
-                {researchs.find((r) => r.id === filter.researchId)?.name}
+                {availableResearchs.find((r) => r.id === filter.researchId)?.name}
               </span>
               <span className="text-xs">
                 {questions.find((q) => q.id === filter.questionId)?.question}
@@ -358,7 +391,7 @@ function MapFilterQuestions({
                   <SelectValue placeholder="Selecione uma area de pesquisa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {researchs.map((research) => (
+                  {availableResearchs.map((research) => (
                     <SelectItem key={research.id} value={research.id}>
                       {research.name}
                     </SelectItem>
@@ -449,7 +482,9 @@ function MapFilterQuestions({
               <Plus />
               Adicionar filtro
             </Button>
-            <Button variant="outline">Cancelar</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

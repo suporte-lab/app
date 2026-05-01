@@ -173,6 +173,282 @@ export const researchsRoute = new Hono()
 
     return c.json({ data: { results, questions, researchs } });
   })
+  .get("/municipality/:id/export", authMiddleware, async (c) => {
+    const municipalityId = c.req.param("id");
+
+    const municipality = await db
+      .selectFrom("municipality")
+      .select(["name"])
+      .where("id", "=", municipalityId)
+      .executeTakeFirst();
+
+    const projects = await db
+      .selectFrom("project")
+      .select(["id", "name"])
+      .where("municipalityId", "=", municipalityId)
+      .execute();
+
+    const projectIds = projects.map((project) => project.id);
+
+    const answersData = projectIds.length
+      ? await db
+          .selectFrom("surveyAnswer")
+          .selectAll()
+          .where("projectId", "in", projectIds)
+          .execute()
+      : [];
+
+    const researchIds = Array.from(
+      new Set(answersData.map((answer) => answer.researchId))
+    );
+
+    const researchsData = researchIds.length
+      ? await db
+          .selectFrom("research")
+          .select(["id", "name", "surveyId", "createdAt"])
+          .where("id", "in", researchIds)
+          .where("isDeleted", "=", false)
+          .execute()
+      : [];
+
+    // Group researches by survey to get questions per research
+    const researchGroups = new Map<string, typeof researchsData>();
+
+    for (const research of researchsData) {
+      if (!researchGroups.has(research.surveyId)) {
+        researchGroups.set(research.surveyId, []);
+      }
+      researchGroups.get(research.surveyId)!.push(research);
+    }
+
+    // Get all questions for all surveys
+    const surveyIds = Array.from(researchGroups.keys());
+    const questionsData = surveyIds.length
+      ? await db
+          .selectFrom("surveyQuestion")
+          .select(["id", "question", "surveyId", "position"])
+          .where("surveyId", "in", surveyIds)
+          .where("isDeleted", "=", false)
+          .orderBy("surveyId")
+          .orderBy("position")
+          .execute()
+      : [];
+
+    const projectsById = Object.fromEntries(
+      projects.map((project) => [project.id, project.name])
+    );
+
+    // Create separate CSV for each research
+    const csvFiles: { filename: string; content: string }[] = [];
+
+    for (const research of researchsData) {
+      const researchQuestions = questionsData.filter(
+        (q) => q.surveyId === research.surveyId
+      );
+
+      const researchAnswers = answersData.filter(
+        (a) => a.researchId === research.id
+      );
+
+      // Group answers by project
+      const projectAnswers = new Map<string, {
+        project: string;
+        createdAt: Date;
+        answers: Record<string, string[]>;
+      }>();
+
+      for (const answer of researchAnswers) {
+        if (!answer.answer) continue;
+
+        const project = projectsById[answer.projectId];
+        if (!project) continue;
+
+        const existing = projectAnswers.get(answer.projectId);
+        const answerCreatedAt = new Date(answer.createdAt);
+
+        if (!existing) {
+          projectAnswers.set(answer.projectId, {
+            project,
+            createdAt: answerCreatedAt,
+            answers: {
+              [answer.questionId]: [answer.answer],
+            },
+          });
+        } else {
+          existing.createdAt =
+            answerCreatedAt.getTime() > existing.createdAt.getTime()
+              ? answerCreatedAt
+              : existing.createdAt;
+
+          const answersForQuestion = existing.answers[answer.questionId] ?? [];
+          answersForQuestion.push(answer.answer);
+          existing.answers[answer.questionId] = answersForQuestion;
+        }
+      }
+
+      const fields = [
+        { label: "Município", value: "municipality" },
+        { label: "Projeto", value: "project" },
+        { label: "Data de envio", value: "createdAt" },
+        ...researchQuestions.map((question) => ({
+          label: question.question,
+          value: question.id,
+        })),
+      ];
+
+      const output = Array.from(projectAnswers.values()).map((row) => {
+        const normalized: Record<string, string> = {
+          municipality: municipality?.name ?? "",
+          project: row.project,
+          createdAt: formatDate(row.createdAt, "dd-MM-yyyy"),
+        };
+
+        for (const question of researchQuestions) {
+          normalized[question.id] =
+            row.answers[question.id]?.join(", ").trim() ?? "";
+        }
+
+        return normalized;
+      });
+
+      const escapeCsv = (value: unknown) => {
+        if (value == null) return "";
+        const str = String(value);
+        if (/[",\n]/.test(str)) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
+
+      const header = fields.map((field) => escapeCsv(field.label)).join(",") + "\n";
+      const rowsCsv = output
+        .map((row) =>
+          fields
+            .map((field) => escapeCsv(row[field.value] ?? ""))
+            .join(",")
+        )
+        .join("\n");
+
+      const csv = header + rowsCsv;
+
+      csvFiles.push({
+        filename: `${research.name.replace(/[^a-zA-Z0-9]/g, "_")}.csv`,
+        content: csv,
+      });
+    }
+
+    // Create combined CSV with all questions
+    const allQuestions = questionsData.sort((a, b) => {
+      // Sort by survey, then by position
+      if (a.surveyId !== b.surveyId) {
+        return a.surveyId.localeCompare(b.surveyId);
+      }
+      return a.position - b.position;
+    });
+
+    const combinedFields = [
+      { label: "Município", value: "municipality" },
+      { label: "Projeto", value: "project" },
+      { label: "Pesquisa", value: "research" },
+      { label: "Data de envio", value: "createdAt" },
+      ...allQuestions.map((question) => ({
+        label: question.question,
+        value: question.id,
+      })),
+    ];
+
+    // Group all answers by project-research combination
+    const combinedRows = new Map<string, {
+      municipality: string;
+      project: string;
+      research: string;
+      createdAt: Date;
+      answers: Record<string, string[]>;
+    }>();
+
+    for (const answer of answersData) {
+      if (!answer.answer) continue;
+
+      const project = projectsById[answer.projectId];
+      const research = researchsData.find((r) => r.id === answer.researchId);
+      if (!project || !research) continue;
+
+      const rowKey = `${answer.projectId}-${answer.researchId}`;
+      const existing = combinedRows.get(rowKey);
+      const answerCreatedAt = new Date(answer.createdAt);
+
+      if (!existing) {
+        combinedRows.set(rowKey, {
+          municipality: municipality?.name ?? "",
+          project,
+          research: research.name,
+          createdAt: answerCreatedAt,
+          answers: {
+            [answer.questionId]: [answer.answer],
+          },
+        });
+      } else {
+        existing.createdAt =
+          answerCreatedAt.getTime() > existing.createdAt.getTime()
+            ? answerCreatedAt
+            : existing.createdAt;
+
+        const answersForQuestion = existing.answers[answer.questionId] ?? [];
+        answersForQuestion.push(answer.answer);
+        existing.answers[answer.questionId] = answersForQuestion;
+      }
+    }
+
+    // Sort combined rows by research name, then by created date (newest first)
+    const sortedCombinedRows = Array.from(combinedRows.values()).sort((a, b) => {
+      const researchCompare = a.research.localeCompare(b.research);
+      if (researchCompare !== 0) return researchCompare;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+
+    const combinedOutput = sortedCombinedRows.map((row) => {
+      const normalized: Record<string, string> = {
+        municipality: row.municipality,
+        project: row.project,
+        research: row.research,
+        createdAt: formatDate(row.createdAt, "dd-MM-yyyy"),
+      };
+
+      for (const question of allQuestions) {
+        normalized[question.id] =
+          row.answers[question.id]?.join(", ").trim() ?? "";
+      }
+
+      return normalized;
+    });
+
+    const escapeCsv = (value: unknown) => {
+      if (value == null) return "";
+      const str = String(value);
+      if (/[",\n]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const combinedHeader = combinedFields.map((field) => escapeCsv(field.label)).join(",") + "\n";
+    const combinedRowsCsv = combinedOutput
+      .map((row) =>
+        combinedFields
+          .map((field) => escapeCsv(row[field.value] ?? ""))
+          .join(",")
+      )
+      .join("\n");
+
+    const combinedCsv = combinedHeader + combinedRowsCsv;
+
+    // Return only the combined CSV
+    return c.body(combinedCsv, 200, {
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": `attachment; filename="todas_pesquisas_${municipality?.name?.replace(/[^a-zA-Z0-9]/g, "_") ?? "municipio"}.csv"`,
+    });
+  })
+
   .post("/:id/mail", authMiddleware, async (c) => {
     const research = await db
       .selectFrom("research")

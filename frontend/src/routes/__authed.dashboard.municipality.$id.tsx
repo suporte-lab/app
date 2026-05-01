@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { Building2, MapPin, Trash2 } from "lucide-react";
+import { Building2, MapPin, Trash2, Download } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -23,9 +24,38 @@ function RouteComponent() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isExporting, setIsExporting] = useState(false);
 
   const { data: municipality } = useQuery(fetchMunicipalityOptions(id));
   const { data: projects } = useQuery(fetchProjectsOptions());
+
+  async function exportMunicipalityResearches() {
+    if (!id) return;
+
+    try {
+      setIsExporting(true);
+      const response = await fetch(`/api/researchs/municipality/${id}/export`);
+
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
+
+      const csv = await response.text();
+      const filename = `todas_pesquisas_${municipality?.name?.replace(/[^a-zA-Z0-9]/g, "_") ?? "municipio"}.csv`;
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+      toast.success("CSV exportado com sucesso");
+    } catch (error) {
+      toast.error("Erro ao exportar pesquisas");
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   const list = projects?.filter((p) => p.municipalityId === id);
 
@@ -43,26 +73,36 @@ function RouteComponent() {
       <DashboardHeader
         title={municipality.name}
         right={
-          <ConfirmDialog
-            title="Deletar município"
-            onConfirm={async () => {
-              const res = await api.municipalities[":id"].$delete({
-                param: { id },
-              });
-
-              if (!res.ok) {
-                return toast.error("Error servidor");
-              }
-
-              toast.success("Apagado com sucesso.");
-              queryClient.invalidateQueries({ queryKey: ["municipalities"] });
-              navigate({ to: "/dashboard/municipality" });
-            }}
-          >
-            <Button variant="outline" size="icon">
-              <Trash2 className="size-4" />
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              disabled={isExporting}
+              onClick={exportMunicipalityResearches}
+            >
+              <Download className="size-4" />
+              Exportar
             </Button>
-          </ConfirmDialog>
+            <ConfirmDialog
+              title="Deletar município"
+              onConfirm={async () => {
+                const res = await api.municipalities[":id"].$delete({
+                  param: { id },
+                });
+
+                if (!res.ok) {
+                  return toast.error("Error servidor");
+                }
+
+                toast.success("Apagado com sucesso.");
+                queryClient.invalidateQueries({ queryKey: ["municipalities"] });
+                navigate({ to: "/dashboard/municipality" });
+              }}
+            >
+              <Button variant="outline" size="icon">
+                <Trash2 className="size-4" />
+              </Button>
+            </ConfirmDialog>
+          </div>
         }
       />
       <div className="flex gap-2 ">

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { Checkbox } from "./ui/checkbox";
+import { MultiSelect } from "./ui/multi-select";
 
 export function SurveyFillableInput(params: {
   type: string;
@@ -289,31 +289,21 @@ function SurveySelectMulti({
   onChange?: (value: string) => void;
   value?: string;
 }) {
-  const [inputValue, setInputValue] = useState(value ?? "");
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const opts = options?.filter((o) => o.value.length > 0);
 
   useEffect(() => {
-    setInputValue(value ?? "");
+    const values = (value ?? "")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
+    setSelectedValues(values);
   }, [value]);
 
-  const selectedValues = inputValue
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
-
-  function toggleValue(val: string) {
-    let next: string[];
-
-    if (selectedValues.includes(val)) {
-      next = selectedValues.filter((v) => v !== val);
-    } else {
-      next = [...selectedValues, val];
-    }
-
-    const result = next.join(",");
-    setInputValue(result);
-    onChange?.(result);
+  function handleChange(values: string[]) {
+    setSelectedValues(values);
+    onChange?.(values.join(","));
   }
 
   return (
@@ -329,17 +319,17 @@ function SurveySelectMulti({
           Nenhuma opção
         </div>
       ) : (
-        <div>
-          {opts.map((option) => (
-            <label key={option.id} className="flex items-start gap-2 py-2">
-              <Checkbox
-                checked={selectedValues.includes(option.value)}
-                onCheckedChange={() => toggleValue(option.value)}
-              />
-              <span>{option.value}</span>
-            </label>
-          ))}
-        </div>
+        <MultiSelect
+          placeholder="Selecione uma ou mais opções"
+          selectedLabel={selectedValues.length > 1 ? "opções" : "opção"}
+          options={opts.map((option) => ({
+            label: option.value,
+            value: option.value,
+          }))}
+          value={selectedValues}
+          onChange={handleChange}
+          size="w-full"
+        />
       )}
     </Label>
   );

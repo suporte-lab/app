@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Flag, Building, FileTextIcon } from "lucide-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -28,7 +28,7 @@ import {
   fetchProjectsOptions,
   fetchResearchsOptions,
   fetchResearchsResultsOptions,
-  fetchSurveysQuestionsOptions,
+  fetchSurveyQuestionsOptions,
 } from "@/lib/api";
 
 export function MonitorSearch() {
@@ -38,18 +38,44 @@ export function MonitorSearch() {
   const { data: researchs } = useSuspenseQuery(fetchResearchsOptions());
   const { data: projects } = useSuspenseQuery(fetchProjectsOptions());
   const { data: categories } = useSuspenseQuery(fetchCategoriesOptions());
-  const { data: questions } = useSuspenseQuery(fetchSurveysQuestionsOptions());
   const { data: researchsResults } = useSuspenseQuery(
     fetchResearchsResultsOptions()
   );
 
-  const [filterResearchs, setFilterResearchs] = useState<string[]>([]);
+  const [selectedMunicipality, setSelectedMunicipality] = useState(
+    municipalities[0].id
+  );
+
+  const municipalityResearchs = researchs.filter(
+    (r) => r.municipalityId === selectedMunicipality
+  );
+
+  const [filterResearchs, setFilterResearchs] = useState<string>(
+    municipalityResearchs[0]?.id || ""
+  );
+
+  const selectedResearch = researchs.find((r) => r.id === filterResearchs);
+
+  const { data: questions } = useQuery(
+    fetchSurveyQuestionsOptions(selectedResearch?.surveyId || "")
+  );
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
   const [filterProjects, setFilterProjects] = useState<string[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<string>(
-    questions[0]?.id ?? ""
-  );
-  const [selectedMunicipality, setSelectedMunicipality] = useState("all");
+  const [selectedQuestion, setSelectedQuestion] = useState<string>("");
+
+  useEffect(() => {
+    const newResearchs = researchs.filter(
+      (r) => r.municipalityId === selectedMunicipality
+    );
+    setFilterResearchs(newResearchs[0]?.id || "");
+  }, [selectedMunicipality, researchs]);
+
+  useEffect(() => {
+    const filteredQuestions = questions?.filter((q) =>
+      ["select", "number"].includes(q.type)
+    );
+    setSelectedQuestion(filteredQuestions?.[0]?.id ?? "");
+  }, [questions]);
 
   const categoriesMap = new Map(categories.map((c) => [c.id, c]));
   const projectsMap = new Map(projects.map((p) => [p.id, p]));
@@ -58,7 +84,7 @@ export function MonitorSearch() {
     { name: string; [key: string]: number | string }[]
   >([]);
 
-  const question = questions.find((q) => q.id === selectedQuestion);
+  const question = questions?.find((q) => q.id === selectedQuestion);
 
   function getChartData() {
     const data: { name: string; [key: string]: number | string }[] = [];
@@ -66,7 +92,7 @@ export function MonitorSearch() {
     for (const [researchId, research] of Object.entries(
       researchsResults.researchs
     )) {
-      if (!!filterResearchs.length && !filterResearchs.includes(researchId)) {
+      if (filterResearchs && filterResearchs !== researchId) {
         continue;
       }
 
@@ -81,10 +107,7 @@ export function MonitorSearch() {
         const categoryData = categoriesMap.get(projectData?.categoryId);
         if (!categoryData) continue;
 
-        if (
-          selectedMunicipality !== "all" &&
-          projectData.municipalityId !== selectedMunicipality
-        ) {
+        if (projectData.municipalityId !== selectedMunicipality) {
           continue;
         }
 
@@ -169,7 +192,6 @@ export function MonitorSearch() {
               <SelectValue placeholder="Selecione um municipio" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">BRASIL</SelectItem>
               {municipalities.map((municipality) => (
                 <SelectItem key={municipality.id} value={municipality.id}>
                   {municipality.name}
@@ -201,13 +223,7 @@ export function MonitorSearch() {
             placeholder="Selecione as unidades"
             selectedLabel={"unidade" + (filterProjects.length > 1 ? "s" : "")}
             options={projects
-              .filter((p) => {
-                if (selectedMunicipality === "all") {
-                  return true;
-                }
-
-                return selectedMunicipality === p.municipalityId;
-              })
+              .filter((p) => selectedMunicipality === p.municipalityId)
               .filter((p) => {
                 if (!filterCategories.length) {
                   return true;
@@ -260,35 +276,25 @@ export function MonitorSearch() {
           />
         </div>
         <div className="space-y-2 p-4 border border-dashed rounded-lg">
-          <div className="gap-1 flex items-center justify-between">
-            <h3 className="text-sm font-medium flex items-center gap-1.5">
-              <Flag className="size-3.5" />
-              Pesquisa
-            </h3>
-            {filterResearchs.length > 0 && (
-              <Button
-                size="inline"
-                variant="underline"
-                className="text-sm p-0 gap-1 items-center"
-                onClick={() => {
-                  setFilterResearchs([]);
-                }}
-              >
-                Limpar
-              </Button>
-            )}
-          </div>
-          <MultiSelect
-            placeholder="Selecione as pesquisas"
-            selectedLabel="pesquisas"
-            options={researchs.map((research) => ({
-              label: research.name,
-              value: research.id,
-            }))}
+          <h3 className="text-sm font-medium flex items-center gap-1.5">
+            <Flag className="size-3.5" />
+            Pesquisa
+          </h3>
+          <Select
             value={filterResearchs}
-            onChange={(value) => setFilterResearchs(value)}
-            size="w-72"
-          />
+            onValueChange={(value) => setFilterResearchs(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione uma pesquisa" />
+            </SelectTrigger>
+            <SelectContent>
+              {municipalityResearchs.map((research) => (
+                <SelectItem key={research.id} value={research.id}>
+                  {research.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2 p-4 border border-dashed rounded-lg">
           <h3 className="text-sm font-medium flex items-center gap-1.5">
@@ -304,7 +310,7 @@ export function MonitorSearch() {
             </SelectTrigger>
             <SelectContent>
               {questions
-                .filter((question) =>
+                ?.filter((question) =>
                   ["select", "number"].includes(question.type)
                 )
                 .map((question) => (
@@ -326,21 +332,18 @@ export function MonitorSearch() {
         </div>
         <Chart data={chartData} />
         <div className="space-y-4">
-          {filterResearchs.length > 0 && (
+          {filterResearchs && (
             <div className="border border-dashed rounded-lg p-4 flex gap-4">
               <h3 className="font-medium py-3 min-w-20 text-slate-600">
-                Pesquisas
+                Pesquisa
               </h3>
               <div className="flex items-center gap-2.5 border-l py-3 px-4">
-                {filterResearchs.map((research) => (
-                  <Badge
-                    key={research}
-                    variant="outline"
-                    className="text-sm font-medium"
-                  >
-                    {researchs.find((r) => r.id === research)?.name}
-                  </Badge>
-                ))}
+                <Badge
+                  variant="outline"
+                  className="text-sm font-medium"
+                >
+                  {municipalityResearchs.find((r) => r.id === filterResearchs)?.name}
+                </Badge>
               </div>
             </div>
           )}

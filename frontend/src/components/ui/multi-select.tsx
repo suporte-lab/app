@@ -99,8 +99,8 @@ export function MultiSelect({
       {selected.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {selected.map((val) => (
-            <Badge key={val} variant="secondary">
-              {options.find((o) => o.value === val)?.label}
+            <Badge key={val} variant="secondary" className="max-w-32">
+              <span className="truncate">{options.find((o) => o.value === val)?.label}</span>
             </Badge>
           ))}
         </div>

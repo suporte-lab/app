@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Flag, Building } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -44,14 +44,33 @@ export function MonitorPublicView() {
     fetchResearchsResultsOptions()
   );
 
-  const [filterResearchs, setFilterResearchs] = useState<string[]>([]);
+  const [selectedMunicipality, setSelectedMunicipality] = useState(
+    municipalities[0].id
+  );
+
+  const municipalityResearchs = researchs.filter(
+    (r) => r.municipalityId === selectedMunicipality
+  );
+
+  const [filterResearchs, setFilterResearchs] = useState<string>(
+    municipalityResearchs[0]?.id || ""
+  );
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
   const [filterProjects, setFilterProjects] = useState<string[]>([]);
-  const [selectedMunicipality, setSelectedMunicipality] = useState("all");
+
+  useEffect(() => {
+    setFilterResearchs(municipalityResearchs[0]?.id || "");
+  }, [selectedMunicipality]);
 
   const categoriesMap = new Map(categories.map((c) => [c.id, c]));
   const projectsMap = new Map(projects.map((p) => [p.id, p]));
-  const question = questions.find((q) => q.id === questions[0]?.id);
+
+  useEffect(() => {
+    const newResearchs = researchs.filter(
+      (r) => r.municipalityId === selectedMunicipality
+    );
+    setFilterResearchs(newResearchs[0]?.id || "");
+  }, [selectedMunicipality, researchs]);
 
   function getBooleanChartData(selectedQuestion: string) {
     const result: {
@@ -62,15 +81,14 @@ export function MonitorPublicView() {
     for (const [researchId, research] of Object.entries(
       researchsResults.researchs
     )) {
-      if (filterResearchs.length && !filterResearchs.includes(researchId)) {
+      if (filterResearchs && filterResearchs !== researchId) {
         continue;
       }
 
       const totalProjects = projects.filter(
         (p) =>
           p.municipalityId === research.research.municipalityId &&
-          (selectedMunicipality === "all" ||
-            selectedMunicipality === p.municipalityId)
+          selectedMunicipality === p.municipalityId
       );
 
       let yesCount = 0;
@@ -84,10 +102,7 @@ export function MonitorPublicView() {
         const projectData = projectsMap.get(projectId);
         if (!projectData) continue;
 
-        if (
-          selectedMunicipality !== "all" &&
-          projectData.municipalityId !== selectedMunicipality
-        ) {
+        if (projectData.municipalityId !== selectedMunicipality) {
           continue;
         }
 
@@ -135,7 +150,7 @@ export function MonitorPublicView() {
     for (const [researchId, research] of Object.entries(
       researchsResults.researchs
     )) {
-      if (filterResearchs.length && !filterResearchs.includes(researchId)) {
+      if (filterResearchs && filterResearchs !== researchId) {
         continue;
       }
 
@@ -152,10 +167,7 @@ export function MonitorPublicView() {
         const projectData = projectsMap.get(projectId);
         if (!projectData) continue;
 
-        if (
-          selectedMunicipality !== "all" &&
-          projectData.municipalityId !== selectedMunicipality
-        ) {
+        if (projectData.municipalityId !== selectedMunicipality) {
           continue;
         }
 
@@ -188,7 +200,7 @@ export function MonitorPublicView() {
     for (const [researchId, research] of Object.entries(
       researchsResults.researchs
     )) {
-      if (filterResearchs.length && !filterResearchs.includes(researchId)) {
+      if (filterResearchs && filterResearchs !== researchId) {
         continue;
       }
 
@@ -205,10 +217,7 @@ export function MonitorPublicView() {
         const projectData = projectsMap.get(projectId);
         if (!projectData) continue;
 
-        if (
-          selectedMunicipality !== "all" &&
-          projectData.municipalityId !== selectedMunicipality
-        ) {
+        if (projectData.municipalityId !== selectedMunicipality) {
           continue;
         }
 
@@ -235,7 +244,7 @@ export function MonitorPublicView() {
     for (const [researchId, research] of Object.entries(
       researchsResults.researchs
     )) {
-      if (!!filterResearchs.length && !filterResearchs.includes(researchId)) {
+      if (filterResearchs && filterResearchs !== researchId) {
         continue;
       }
 
@@ -250,10 +259,7 @@ export function MonitorPublicView() {
         const categoryData = categoriesMap.get(projectData?.categoryId);
         if (!categoryData) continue;
 
-        if (
-          selectedMunicipality !== "all" &&
-          projectData.municipalityId !== selectedMunicipality
-        ) {
+        if (projectData.municipalityId !== selectedMunicipality) {
           continue;
         }
 
@@ -265,7 +271,7 @@ export function MonitorPublicView() {
         }
 
         for (const [questionId, answer] of Object.entries(project)) {
-          if (!question || questionId !== selectedQuestion) continue;
+          if (questionId !== selectedQuestion) continue;
 
           // const date = format(research.research.createdAt, "dd/MM/yyyy");
           const indexValue = research.research.name;
@@ -311,7 +317,6 @@ export function MonitorPublicView() {
               <SelectValue placeholder="Selecione um municipio" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">BRASIL</SelectItem>
               {municipalities.map((municipality) => (
                 <SelectItem key={municipality.id} value={municipality.id}>
                   {municipality.name}
@@ -382,13 +387,7 @@ export function MonitorPublicView() {
               "equipamento" + (filterProjects.length > 1 ? "s" : "")
             }
             options={projects
-              .filter((p) => {
-                if (selectedMunicipality === "all") {
-                  return true;
-                }
-
-                return selectedMunicipality === p.municipalityId;
-              })
+              .filter((p) => selectedMunicipality === p.municipalityId)
               .filter((p) => {
                 if (!filterCategories.length) {
                   return true;
@@ -407,35 +406,25 @@ export function MonitorPublicView() {
         </div>
 
         <div className="space-y-2 p-4 border border-dashed rounded-lg">
-          <div className="gap-1 flex items-center justify-between">
-            <h3 className="text-sm font-medium flex items-center gap-1.5">
-              <Flag className="size-3.5" />
-              Pesquisa
-            </h3>
-            {filterResearchs.length > 0 && (
-              <Button
-                size="inline"
-                variant="underline"
-                className="text-sm p-0 gap-1 items-center"
-                onClick={() => {
-                  setFilterResearchs([]);
-                }}
-              >
-                Limpar
-              </Button>
-            )}
-          </div>
-          <MultiSelect
-            placeholder="Selecione as pesquisas"
-            selectedLabel="pesquisas"
-            options={researchs.map((research) => ({
-              label: research.name,
-              value: research.id,
-            }))}
+          <h3 className="text-sm font-medium flex items-center gap-1.5">
+            <Flag className="size-3.5" />
+            Pesquisa
+          </h3>
+          <Select
             value={filterResearchs}
-            onChange={(value) => setFilterResearchs(value)}
-            size="w-72"
-          />
+            onValueChange={(value) => setFilterResearchs(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione uma pesquisa" />
+            </SelectTrigger>
+            <SelectContent>
+              {municipalityResearchs.map((research) => (
+                <SelectItem key={research.id} value={research.id}>
+                  {research.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div className="w-full flex-1 space-y-10">
@@ -450,9 +439,9 @@ export function MonitorPublicView() {
           })
           .filter((question) => question.isPublic)
           .map((question) => (
-            <div className="transition-all rounded-2xl border border-dashed overflow-hidden relative isolate p-10 space-y-16">
+            <div className="transition-all rounded-lg border border-dashed overflow-hidden relative isolate p-6 space-y-8">
               <div className="space-y-4">
-                <div className="w-12 h-1.5 rounded-full bg-slate-200"></div>
+                <div className="w-12 h-1.5 rounded-full bg-slate-300"></div>
                 <h1 className="text-xl font-medium text-slate-900">
                   {question?.question}
                 </h1>
@@ -478,25 +467,6 @@ export function MonitorPublicView() {
               })()}
 
               <div className="space-y-4">
-                {filterResearchs.length > 0 && (
-                  <div className="border border-dashed rounded-lg p-4 flex gap-4">
-                    <h3 className="font-medium py-3 min-w-20 text-slate-600">
-                      Pesquisas
-                    </h3>
-                    <div className="flex items-center gap-2.5 border-l py-3 px-4">
-                      {filterResearchs.map((research) => (
-                        <Badge
-                          key={research}
-                          variant="outline"
-                          className="text-sm font-medium"
-                        >
-                          {researchs.find((r) => r.id === research)?.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {filterCategories.length > 0 && (
                   <div className="border border-dashed rounded-lg p-4 flex gap-4">
                     <h3 className="font-medium py-3 min-w-20 text-slate-600">
@@ -729,7 +699,7 @@ function BooleanChart({
           >
             <div
               className="size-4 shrink-0 rounded-[2px]"
-              style={{ backgroundColor: colors[i] }}
+              style={{ backgroundColor: colors[i % colors.length] }}
             />
             <span className="text-xs font-medium">{columnLabels[key]}</span>
           </div>
@@ -778,7 +748,7 @@ function BooleanChart({
                         <div key={i} className="flex items-center gap-1.5 px-2">
                           <div
                             className="size-4 shrink-0 rounded-[2px]"
-                            style={{ backgroundColor: colors[i] }}
+                            style={{ backgroundColor: colors[i % colors.length] }}
                           />
                           <span className="text-sm font-medium flex-1 truncate">
                             {columnLabels[key] ?? p.name}
@@ -803,7 +773,7 @@ function BooleanChart({
               key={key}
               stackId="a"
               dataKey={key}
-              fill={colors[i]}
+              fill={colors[i % colors.length]}
               maxBarSize={64}
             >
               <LabelList dataKey={key} content={renderCustomLabel} />
@@ -897,7 +867,7 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
               >
                 <div
                   className="size-4 shrink-0 rounded-[2px]"
-                  style={{ backgroundColor: colors[i] }}
+                  style={{ backgroundColor: colors[i % colors.length] }}
                 />
                 <span className="text-xs font-medium">{key}</span>
               </div>
@@ -966,7 +936,7 @@ function Chart({ data }: { data: { [key: string]: number | string }[] }) {
                   key={key + i}
                   stackId={"a"}
                   dataKey={key}
-                  fill={colors[i]}
+                  fill={colors[i % colors.length]}
                   maxBarSize={64}
                 >
                   <LabelList dataKey={key} content={renderCustomLabel} />
@@ -1038,7 +1008,7 @@ const CustomTooltip = ({
             <div key={stack + i} className="flex items-center gap-1.5 px-2">
               <div
                 className="size-4 shrink-0 rounded-[2px]"
-                style={{ backgroundColor: colors[i] }}
+                style={{ backgroundColor: colors[i % colors.length] }}
               />
               <span className="text-sm font-medium flex-1 truncate">
                 {stack.name}
